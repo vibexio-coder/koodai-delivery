@@ -22,6 +22,7 @@ import Orders from "../pages/dashboard/Orders";
 import Earnings from "../pages/dashboard/Earnings";
 import Profile from "../pages/dashboard/Profile";
 import AppSettings from "../pages/dashboard/AppSettings";
+import HelpSupport from "../pages/dashboard/HelpSupport";
 
 export default function AppRoutes() {
   return (
@@ -50,6 +51,7 @@ export default function AppRoutes() {
         <Route path="earnings" element={<Earnings />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<AppSettings />} />
+        <Route path="help-support" element={<HelpSupport />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -43,7 +43,7 @@ export default function Profile() {
     {
       icon: HelpCircle,
       label: "Help & Support",
-      path: "#",
+      path: "/dashboard/help-support",
     },
   ];
 

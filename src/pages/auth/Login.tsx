@@ -5,6 +5,8 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../components/ui/input-otp";
 import { toast } from "sonner";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,40 +17,80 @@ export default function Login() {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [partnerId, setPartnerId] = useState<string | null>(null);
 
   useEffect(() => {
     setStep("phone");
     setOtp("");
+    setPartnerId(null);
   }, [isSignup]);
 
-  const sendOTP = () => {
+  const sendOTP = async () => {
     if (!/^[6-9]\d{9}$/.test(phone)) {
       toast.error("Enter a valid 10-digit mobile number");
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      toast.success("OTP Sent", { description: "Use 123456 (mock)" });
-      setStep("otp");
+
+    try {
+      // Normalize phone number: remove +91 if present, trim spaces
+      const normalizedPhone = phone.replace(/^\+91/, "").trim();
+
+      // Querying basicInfo.phone with normalized 10-digit number
+      const q = query(
+        collection(db, "delivery"),
+        where("basicInfo.phone", "==", normalizedPhone)
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        toast.error("This phone number is not registered as a delivery partner.");
+        setLoading(false);
+        return;
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+      const status = userData.status;
+
+      if (status === "approved") {
+        setPartnerId(userDoc.id);
+        toast.success("OTP Sent", { description: "Use 123456 (mock)" });
+        setStep("otp");
+      } else if (status === "pending_verification") {
+        toast.error("Your profile is under admin verification.");
+      } else if (status === "rejected") {
+        toast.error(`Your application was rejected by admin.${userData.rejectionReason ? ` Reason: ${userData.rejectionReason}` : ""}`);
+      } else {
+        toast.error("Invalid account status.");
+      }
+    } catch (error) {
+      console.error("Error checking phone number:", error);
+      toast.error("Failed to verify phone number. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
-  const verifyOTP = () => {
+  const verifyOTP = async () => {
     if (otp !== "123456") {
       toast.error("Invalid OTP", { description: "Try 123456" });
       return;
     }
 
-    toast.success(isSignup ? "Mobile Verified" : "Login Successful");
+    setLoading(true);
 
+    // Simulate verification delay
     setTimeout(() => {
-      if (isSignup) {
-        navigate("/onboarding/step-1");
-      } else {
-        navigate("/dashboard");
+      if (partnerId) {
+        localStorage.setItem("partnerId", partnerId);
       }
+
+      toast.success("Login Successful");
+      navigate("/dashboard");
+      setLoading(false);
     }, 1000);
   };
 
@@ -124,16 +166,17 @@ export default function Login() {
 
               <Button
                 onClick={verifyOTP}
-                disabled={otp.length !== 6}
+                disabled={otp.length !== 6 || loading}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-xl"
               >
-                Verify & Continue
+                {loading ? "Verifying..." : "Verify & Continue"}
               </Button>
 
               <Button
                 variant="ghost"
                 onClick={() => setStep("phone")}
                 className="w-full text-foreground hover:bg-accent"
+                disabled={loading}
               >
                 Change Number
               </Button>

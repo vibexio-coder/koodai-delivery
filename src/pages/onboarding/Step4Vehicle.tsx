@@ -12,6 +12,7 @@ import {
 } from "../../components/ui/select";
 import { toast } from "sonner";
 import { useOnboardingStore } from "../../store/useOnboardingStore";
+import { compressImage } from "../../utils/compressImage";
 
 export default function Step4Vehicle() {
   const navigate = useNavigate();
@@ -22,6 +23,24 @@ export default function Step4Vehicle() {
   const [plate, setPlate] = useState("");
   const [model, setModel] = useState("");
   const [license, setLicense] = useState("");
+  const [insurance, setInsurance] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size must be less than 5MB");
+        return;
+      }
+
+      try {
+        const compressed = await compressImage(file);
+        setInsurance(compressed);
+      } catch (e) {
+        toast.error("Failed to process image");
+      }
+    }
+  };
 
   /* ---------- NEXT ---------- */
   const handleNext = () => {
@@ -55,12 +74,18 @@ export default function Step4Vehicle() {
       return;
     }
 
+    if (!insurance) {
+      toast.error("Vehicle insurance is required");
+      return;
+    }
+
     /* SAVE TO STORE */
     setVehicle({
       vehicleType,
       plate: normalizedPlate,
       model: normalizedModel,
       license: normalizedLicense,
+      insuranceImage: insurance
     });
 
     toast.success("Vehicle details saved");
@@ -132,11 +157,27 @@ export default function Step4Vehicle() {
             className="uppercase"
           />
         </div>
+
+        {/* INSURANCE UPLOAD */}
+        <div className="space-y-2">
+          <Label className="text-foreground">Vehicle Insurance (Required)</Label>
+          <div className="border border-input rounded-xl p-4 bg-background">
+            <Input
+              type="file"
+              accept="image/png, image/jpeg, application/pdf"
+              onChange={handleFileChange}
+              className="cursor-pointer"
+            />
+            <p className="text-xs text-muted-foreground mt-2">Max 500KB. JPG, PNG, PDF allowed.</p>
+            {insurance && <p className="text-xs text-green-600 mt-1">File uploaded successfully</p>}
+          </div>
+        </div>
+
       </div>
 
       <Button
         onClick={handleNext}
-        disabled={!plate || !model || !license}
+        disabled={!plate || !model || !license || !insurance}
         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg disabled:opacity-50"
       >
         Save Vehicle Details

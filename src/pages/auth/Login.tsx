@@ -53,18 +53,21 @@ export default function Login() {
 
       const userDoc = querySnapshot.docs[0];
       const userData = userDoc.data();
-      const status = userData.status;
+      // key is admin_status as per new design, fallback to status for backward compat if needed
+      const status = (userData.admin_status || userData.status || "").toUpperCase();
 
-      if (status === "approved") {
+      if (status === "APPROVED") {
         setPartnerId(userDoc.id);
         toast.success("OTP Sent", { description: "Use 123456 (mock)" });
         setStep("otp");
-      } else if (status === "pending_verification") {
-        toast.error("Your profile is under admin verification.");
-      } else if (status === "rejected") {
-        toast.error(`Your application was rejected by admin.${userData.rejectionReason ? ` Reason: ${userData.rejectionReason}` : ""}`);
+      } else if (status === "PENDING" || status === "PENDING_VERIFICATION") {
+        toast.error("Your application is under review");
+      } else if (status === "SUSPENDED") {
+        toast.error("Your account is suspended. Contact support");
+      } else if (status === "REJECTED") {
+        toast.error("Your application was rejected");
       } else {
-        toast.error("Invalid account status.");
+        toast.error("Invalid account status: " + status);
       }
     } catch (error) {
       console.error("Error checking phone number:", error);

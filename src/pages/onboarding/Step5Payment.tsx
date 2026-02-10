@@ -12,6 +12,7 @@ export default function Step5Payment() {
 
   const [mounted, setMounted] = useState(false);
 
+  const [bankName, setBankName] = useState("");
   const [holderName, setHolderName] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [confirmAccountNo, setConfirmAccountNo] = useState("");
@@ -23,6 +24,11 @@ export default function Step5Payment() {
   }, []);
 
   const handleNext = () => {
+
+    if (!bankName.trim()) {
+      toast.error("Bank name is required");
+      return;
+    }
 
     if (!/^[A-Za-z ]+$/.test(holderName.trim())) {
       toast.error("Enter valid account holder name");
@@ -51,6 +57,7 @@ export default function Step5Payment() {
 
     // ✅ SAVE TO STORE
     setPayment({
+      bankName: bankName.trim(),
       holderName,
       accountNo,
       ifsc,
@@ -78,6 +85,16 @@ export default function Step5Payment() {
       </div>
 
       <div className="space-y-4">
+
+        <div>
+          <Label className="text-foreground">Bank Name</Label>
+          <Input
+            autoComplete="organization"
+            value={bankName}
+            onChange={(e) => setBankName(e.target.value)}
+            placeholder="e.g. State Bank of India"
+          />
+        </div>
 
         <div>
           <Label className="text-foreground">Account Holder Name</Label>

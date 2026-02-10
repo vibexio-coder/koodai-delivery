@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1029772489476",
+    "project_id": "koodai-24c65",
+    "storage_bucket": "koodai-24c65.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1029772489476:android:dcce6362b5908e3f635651",
+        "android_client_info": {
+          "package_name": "com.koodai.delivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUWdUWjYNax9BYnL26sGWx-lmnr6QFKW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

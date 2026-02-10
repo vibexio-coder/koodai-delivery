@@ -11,6 +11,9 @@ import {
 } from "../../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { toast } from "sonner";
+import { doc, getDoc, collection, query, where, onSnapshot, Timestamp, addDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
+import { Order } from "../../types";
 
 type OrderState = "idle" | "offered" | "active" | "completed";
 
@@ -18,6 +21,71 @@ export default function Home() {
   const [isOnline, setIsOnline] = useState(false);
   const [orderState, setOrderState] = useState<OrderState>("idle");
   const [countdown, setCountdown] = useState(30);
+  const [userData, setUserData] = useState<any>(null);
+
+  // New state for daily stats
+  const [todayOrders, setTodayOrders] = useState(0);
+  const [todayEarnings, setTodayEarnings] = useState(0);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const partnerId = localStorage.getItem("partnerId");
+      if (partnerId) {
+        try {
+          const docRef = doc(db, "delivery", partnerId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  // Fetch and filter orders for ONLY today
+  useEffect(() => {
+    const partnerId = localStorage.getItem("partnerId");
+    if (!partnerId) return;
+
+    // Listen to all orders for this partner
+    // We filter strictly for "Today" on the client side to avoid complex index requirements right now
+    const q = query(
+      collection(db, "orders"),
+      where("partnerId", "==", partnerId)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+      let ordersCount = 0;
+      let earnings = 0;
+
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data() as Order;
+        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+
+        // Filter: Created Today AND Status is Completed/Delivered
+        if (
+          createdAt >= startOfToday &&
+          createdAt <= endOfToday &&
+          (data.status === "completed" || data.status === "delivered")
+        ) {
+          ordersCount++;
+          earnings += Number(data.totalAmount) || 0;
+        }
+      });
+
+      setTodayOrders(ordersCount);
+      setTodayEarnings(earnings);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     let timer: any;
@@ -65,18 +133,65 @@ export default function Home() {
     }, 1500);
   };
 
+  // Temporary function to seed test data
+  const seedTestData = async () => {
+    const partnerId = localStorage.getItem("partnerId");
+    if (!partnerId) {
+      toast.error("No partner ID found");
+      return;
+    }
+
+    try {
+      // Order 1: Today (Should count)
+      await addDoc(collection(db, "orders"), {
+        partnerId,
+        totalAmount: 100,
+        status: "completed",
+        createdAt: Timestamp.now(),
+        userId: "test-user",
+        restaurantId: "test-rest-1",
+        restaurantName: "Test Restaurant",
+        items: []
+      });
+
+      // Order 2: Yesterday (Should NOT count)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      await addDoc(collection(db, "orders"), {
+        partnerId,
+        totalAmount: 50,
+        status: "completed", // Even if completed, date is wrong
+        createdAt: Timestamp.fromDate(yesterday),
+        userId: "test-user",
+        restaurantId: "test-rest-2",
+        restaurantName: "Yesterday Foods",
+        items: []
+      });
+
+      toast.success("Test data seeded! Check Dashboard.");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to seed data");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="bg-background border-b border-border p-4 sticky top-0 z-10 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src={userData?.basicInfo?.profilePhoto || "https://github.com/shadcn.png"} />
+            <AvatarFallback>{userData?.basicInfo?.name?.[0] || "D"}</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-sm font-bold text-foreground">John Doe</h1>
-            <p className="text-xs text-muted-foreground">ID: KD-8821</p>
+            <h1 className="text-sm font-bold text-foreground">
+              {userData?.basicInfo?.name || "Loading..."}
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              ID: {userData ? `KD-${localStorage.getItem("partnerId")?.slice(0, 4).toUpperCase()}` : "..."}
+            </p>
           </div>
         </div>
 
@@ -97,16 +212,27 @@ export default function Home() {
           <Card className="bg-yellow-400 border-none rounded-2xl">
             <CardContent className="p-4">
               <p className="text-xs text-yellow-900">Earnings</p>
-              <p className="text-xl font-bold text-black">₹1,240</p>
+              <p className="text-xl font-bold text-black">
+                ₹{todayEarnings.toLocaleString()}
+              </p>
             </CardContent>
           </Card>
 
           <Card className="bg-card rounded-2xl">
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">Orders</p>
-              <p className="text-xl font-bold text-foreground">12</p>
+              <p className="text-xl font-bold text-foreground">
+                {todayOrders}
+              </p>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Debug Tool - REMOVE IN PROD */}
+        <div className="flex justify-end">
+          <Button variant="outline" size="sm" onClick={seedTestData} className="text-xs h-7">
+            Seed Test Data
+          </Button>
         </div>
 
         {/* Offline */}

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -21,6 +22,7 @@ import Home from "../pages/dashboard/Home";
 import Orders from "../pages/dashboard/Orders";
 import Earnings from "../pages/dashboard/Earnings";
 import Profile from "../pages/dashboard/Profile";
+import ProfileDetails from "../pages/dashboard/ProfileDetails";
 import AppSettings from "../pages/dashboard/AppSettings";
 import HelpSupport from "../pages/dashboard/HelpSupport";
 
@@ -33,7 +35,7 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login />} />
       </Route>
 
-      {/* Onboarding */}
+      {/* Onboarding (Registration - Public) */}
       <Route path="/onboarding" element={<OnboardingLayout />}>
         <Route index element={<Navigate to="step-1" replace />} />
         <Route path="step-1" element={<Step1BasicInfo />} />
@@ -44,14 +46,17 @@ export default function AppRoutes() {
         <Route path="step-6" element={<Step6Review />} />
       </Route>
 
-      {/* Dashboard */}
-      <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<Home />} />
-        <Route path="orders" element={<Orders />} />
-        <Route path="earnings" element={<Earnings />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="settings" element={<AppSettings />} />
-        <Route path="help-support" element={<HelpSupport />} />
+      {/* Dashboard (Protected) */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Home />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="earnings" element={<Earnings />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="profile/details" element={<ProfileDetails />} />
+          <Route path="settings" element={<AppSettings />} />
+          <Route path="help-support" element={<HelpSupport />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

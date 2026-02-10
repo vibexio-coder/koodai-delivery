@@ -6,9 +6,10 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { toast } from "sonner";
 import { useOnboardingStore } from "../../store/useOnboardingStore";
+import { compressImage } from "../../utils/compressImage";
 
 /* ---------- CONSTANTS ---------- */
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 500 * 1024; // 500KB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 
 /* ---------- COMPONENT ---------- */
@@ -37,20 +38,12 @@ export default function Step3KYC() {
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`${label}: File must be under 5MB`);
+      toast.error(`${label}: File must be under 500KB`);
       return false;
     }
 
     return true;
   };
-
-  const fileToBase64 = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
 
   /* ---------- SUBMIT ---------- */
 
@@ -62,9 +55,9 @@ export default function Step3KYC() {
     try {
       setLoading(true);
 
-      const aadhaarBase64 = await fileToBase64(aadhaar!);
-      const panBase64 = await fileToBase64(pan!);
-      const licenseBase64 = await fileToBase64(license!);
+      const aadhaarBase64 = aadhaar ? await compressImage(aadhaar) : "";
+      const panBase64 = pan ? await compressImage(pan) : "";
+      const licenseBase64 = license ? await compressImage(license) : "";
 
       setKYC({
         aadhaarBase64,

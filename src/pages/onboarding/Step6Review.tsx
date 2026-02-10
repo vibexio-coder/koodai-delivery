@@ -12,7 +12,6 @@ import { toast } from "sonner";
 
 import { db } from "../../firebase/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-
 import { useOnboardingStore } from "../../store/useOnboardingStore";
 
 export default function Step6Review() {
@@ -41,15 +40,27 @@ export default function Step6Review() {
         try {
             setSubmitting(true);
 
-            await addDoc(collection(db, "delivery"), {
+            // Construct payload
+            const payload = {
                 basicInfo,
                 permissions,
                 vehicle,
                 payment,
-                kyc, // Base64 documents
+                kyc, // Base64s (Compressed)
                 status: "pending_verification",
                 createdAt: serverTimestamp(),
-            });
+            };
+
+            // Size Check
+            const json = JSON.stringify(payload);
+            const size = new Blob([json]).size;
+            console.log("Payload size:", size);
+
+            if (size > 950000) { // < 1MB safety
+                throw new Error(`Data too large (${Math.round(size / 1024)}KB). Please use smaller images.`);
+            }
+
+            await addDoc(collection(db, "delivery"), payload);
 
             toast.success("Application submitted!", {
                 description: "Your profile is under verification.",
@@ -59,8 +70,11 @@ export default function Step6Review() {
                 reset();
                 navigate("/");
             }, 1500);
-        } catch {
-            toast.error("Submission failed. Try again.");
+        } catch (error: any) {
+            console.error("Submission Error:", error);
+            toast.error("Submission failed", {
+                description: error.message || "Please try again later",
+            });
         } finally {
             setSubmitting(false);
         }
@@ -93,19 +107,33 @@ export default function Step6Review() {
                     </Button>
                 </CardHeader>
 
-                <CardContent className="text-sm space-y-1 text-muted-foreground">
-                    <p>
-                        <span className="text-foreground">Name:</span>{" "}
-                        {basicInfo?.name}
-                    </p>
-                    <p>
-                        <span className="text-foreground">Phone:</span>{" "}
-                        {basicInfo?.phone}
-                    </p>
-                    <p>
-                        <span className="text-foreground">Email:</span>{" "}
-                        {basicInfo?.email}
-                    </p>
+                <CardContent className="text-sm space-y-3 text-muted-foreground">
+                    {/* Profile Photo */}
+                    <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border border-border">
+                            {basicInfo?.profilePhoto ? (
+                                <img
+                                    src={basicInfo.profilePhoto}
+                                    alt="Profile"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-muted flex items-center justify-center text-xs">No Photo</div>
+                            )}
+                        </div>
+                        <div>
+                            <p className="font-medium text-foreground text-lg">{basicInfo?.name}</p>
+                            <p>{basicInfo?.phone}</p>
+                            <p>{basicInfo?.email}</p>
+                        </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border mt-2">
+                        <span className="text-foreground block mb-1 font-medium">Address:</span>
+                        {basicInfo?.houseNo}, {basicInfo?.street}, {basicInfo?.area}<br />
+                        {basicInfo?.landmark}<br />
+                        {basicInfo?.city}, {basicInfo?.state} - {basicInfo?.pincode}
+                    </div>
                 </CardContent>
             </Card>
 
@@ -138,6 +166,16 @@ export default function Step6Review() {
                         <span className="text-foreground">DL:</span>{" "}
                         {vehicle?.license}
                     </p>
+                    <p>
+                        <span className="text-foreground">Model:</span>{" "}
+                        {vehicle?.model}
+                    </p>
+                    {vehicle?.insuranceImage && (
+                        <div className="mt-2">
+                            <span className="text-foreground">Insurance:</span>
+                            <span className="ml-2 text-green-600 text-xs">Uploaded</span>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 

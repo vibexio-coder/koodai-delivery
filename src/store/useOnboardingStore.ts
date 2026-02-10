@@ -4,11 +4,18 @@ import { persist } from "zustand/middleware";
 /* ---------- TYPES ---------- */
 
 interface BasicInfo {
+  profilePhoto: string; // Base64
   name: string;
-  address: string;
+  houseNo: string;
+  street: string;
+  area: string;
+  landmark: string;
+  city: string;
+  state: string;
+  pincode: string;
   emergency?: string;
   phone: string;
-  email: string;
+  email?: string;
 }
 
 interface Permissions {
@@ -22,9 +29,11 @@ interface Vehicle {
   plate: string;
   model: string;
   license: string;
+  insuranceImage?: string | null;
 }
 
 interface Payment {
+  bankName: string;
   holderName: string;
   accountNo: string;
   ifsc: string;

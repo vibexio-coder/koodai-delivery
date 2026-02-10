@@ -1,11 +1,12 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
-  Truck,
   Settings,
   HelpCircle,
   LogOut,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import {
@@ -15,25 +16,60 @@ import {
 } from "../../components/ui/avatar";
 import { Card, CardContent } from "../../components/ui/card";
 import { toast } from "sonner";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const partnerId = localStorage.getItem("partnerId");
+      if (!partnerId) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const docRef = doc(db, "delivery", partnerId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
 
   const handleLogout = () => {
-    toast.info("Logging out...");
-    setTimeout(() => navigate("/"), 1000);
+    localStorage.removeItem("partnerId");
+    toast.info("Logged out successfully");
+    navigate("/");
   };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const { basicInfo } = userData || {};
 
   const menuItems = [
     {
       icon: User,
-      label: "Personal Details",
-      path: "/onboarding/step-6",
-    },
-    {
-      icon: Truck,
-      label: "Vehicle Information",
-      path: "/onboarding/step-4",
+      label: "Profile", // Changed from "Personal Details" to "Profile" as per request
+      path: "/dashboard/profile/details",
     },
     {
       icon: Settings,
@@ -52,15 +88,15 @@ export default function Profile() {
       {/* Header */}
       <div className="bg-background p-6 pb-8 border-b border-border text-center">
         <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-yellow-200 dark:ring-yellow-500/30">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>JD</AvatarFallback>
+          <AvatarImage src={basicInfo?.profilePhoto || "https://github.com/shadcn.png"} />
+          <AvatarFallback>{basicInfo?.name?.[0] || "D"}</AvatarFallback>
         </Avatar>
 
         <h1 className="text-xl font-bold text-foreground">
-          John Doe
+          {basicInfo?.name || "Delivery Partner"}
         </h1>
         <p className="text-sm text-muted-foreground">
-          +91 98765 43210
+          {basicInfo?.phone}
         </p>
 
         <div className="mt-5 flex justify-center gap-6">
@@ -79,9 +115,7 @@ export default function Profile() {
             {menuItems.map((item, index) => (
               <button
                 key={index}
-                onClick={() =>
-                  item.path !== "#" && navigate(item.path)
-                }
+                onClick={() => navigate(item.path)}
                 className="w-full flex items-center justify-between px-4 py-4
                   hover:bg-accent/50 transition"
               >
@@ -118,8 +152,6 @@ export default function Profile() {
   );
 }
 
-/* Small helpers */
-
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-center">
@@ -134,5 +166,5 @@ function Stat({ label, value }: { label: string; value: string }) {
 }
 
 function Divider() {
-  return <div className="w-px bg-border" />;
+  return <div className="w-px bg-border h-8 self-center" />;
 }

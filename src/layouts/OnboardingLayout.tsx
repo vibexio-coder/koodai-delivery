@@ -26,11 +26,22 @@ export default function OnboardingLayout() {
         }
     }, [location]);
 
+    const handleBack = () => {
+        const currentIndex = steps.findIndex(step => location.pathname === step);
+        if (currentIndex === 0) {
+            navigate("/login");
+        } else if (currentIndex > 0) {
+            navigate(steps[currentIndex - 1]);
+        } else {
+            navigate(-1);
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-background">
             {/* Header */}
             <div className="p-4 border-b border-border flex items-center gap-4 sticky top-0 bg-background z-10">
-                <Button variant="ghost" size="icon" onClick={() => navigate(-1)} disabled={location.pathname === steps[0]}>
+                <Button variant="ghost" size="icon" onClick={handleBack}>
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div className="flex-1">

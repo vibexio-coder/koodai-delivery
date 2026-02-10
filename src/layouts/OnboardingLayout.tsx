@@ -29,7 +29,7 @@ export default function OnboardingLayout() {
     const handleBack = () => {
         const currentIndex = steps.findIndex(step => location.pathname === step);
         if (currentIndex === 0) {
-            navigate("/login");
+            navigate("/");
         } else if (currentIndex > 0) {
             navigate(steps[currentIndex - 1]);
         } else {

@@ -17,8 +17,10 @@ import { Order } from "../../types";
 
 type OrderState = "idle" | "offered" | "active" | "completed";
 
+import { useAppStore } from "../../store/useAppStore";
+
 export default function Home() {
-  const [isOnline, setIsOnline] = useState(false);
+  const { isOnline, setOnline } = useAppStore();
   const [orderState, setOrderState] = useState<OrderState>("idle");
   const [countdown, setCountdown] = useState(30);
   const [userData, setUserData] = useState<any>(null);
@@ -129,7 +131,7 @@ export default function Home() {
     toast.success("Delivery Completed!");
     setTimeout(() => {
       setOrderState("idle");
-      setIsOnline(true);
+      setOnline(true);
     }, 1500);
   };
 
@@ -202,7 +204,7 @@ export default function Home() {
           >
             {isOnline ? "ONLINE" : "OFFLINE"}
           </span>
-          <Switch checked={isOnline} onCheckedChange={setIsOnline} />
+          <Switch checked={isOnline} onCheckedChange={setOnline} />
         </div>
       </header>
 

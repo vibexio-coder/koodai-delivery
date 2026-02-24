@@ -40,7 +40,7 @@ export default function OnboardingLayout() {
     return (
         <div className="flex flex-col min-h-screen bg-background">
             {/* Header */}
-            <div className="p-4 border-b border-border flex items-center gap-4 sticky top-0 bg-background z-10">
+            <div className="p-4 border-b border-border flex items-center gap-4 sticky top-0 bg-background z-10 pt-[calc(1rem+env(safe-area-inset-top))]">
                 <Button variant="ghost" size="icon" onClick={handleBack}>
                     <ArrowLeft className="w-5 h-5" />
                 </Button>

@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 
+import { t } from "../../i18n/translations";
+
 export default function Profile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -51,10 +53,29 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.removeItem("partnerId");
-    toast.info("Logged out successfully");
+    toast.info(t("logoutSuccess"));
     navigate("/");
   };
 
+  // ...
+  const menuItems = [
+    {
+      icon: User,
+      label: t("profile"),
+      path: "/dashboard/profile/details",
+    },
+    {
+      icon: Settings,
+      label: t("appSettings"),
+      path: "/dashboard/settings",
+    },
+    {
+      icon: HelpCircle,
+      label: t("helpSupport"),
+      path: "/dashboard/help-support",
+    },
+  ];
+  //...
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -64,24 +85,6 @@ export default function Profile() {
   }
 
   const { basicInfo } = userData || {};
-
-  const menuItems = [
-    {
-      icon: User,
-      label: "Profile", // Changed from "Personal Details" to "Profile" as per request
-      path: "/dashboard/profile/details",
-    },
-    {
-      icon: Settings,
-      label: "App Settings",
-      path: "/dashboard/settings",
-    },
-    {
-      icon: HelpCircle,
-      label: "Help & Support",
-      path: "/dashboard/help-support",
-    },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
@@ -100,11 +103,11 @@ export default function Profile() {
         </p>
 
         <div className="mt-5 flex justify-center gap-6">
-          <Stat label="Rating" value="4.8" />
+          <Stat label={t("rating")} value="4.8" />
           <Divider />
-          <Stat label="Trips" value="1,240" />
+          <Stat label={t("trips")} value="1,240" />
           <Divider />
-          <Stat label="Years" value="2.5" />
+          <Stat label={t("years")} value="2.5" />
         </div>
       </div>
 
@@ -141,11 +144,11 @@ export default function Profile() {
           onClick={handleLogout}
         >
           <LogOut className="w-4 h-4 mr-2" />
-          Logout
+          {t("logout")}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          App Version 1.0.0 (Build 2024)
+          {t("appVersion")} 1.0.0 (Build 2024)
         </p>
       </div>
     </div>

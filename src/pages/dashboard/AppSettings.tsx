@@ -14,16 +14,19 @@ import {
 import { toast } from "sonner";
 import { useTheme } from "../../context/ThemeContext";
 
+import { t } from "../../i18n/translations";
+import { useAppStore } from "../../store/useAppStore";
+
 export default function AppSettings() {
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { language, setLanguage } = useAppStore(); // Use global language state
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoOnline, setAutoOnline] = useState(false);
-  const [language, setLanguage] = useState("English");
 
   const clearAppData = () => {
     localStorage.clear();
-    toast.success("App data cleared");
+    toast.success(t("dataCleared"));
     setTimeout(() => window.location.reload(), 800);
   };
 
@@ -41,10 +44,10 @@ export default function AppSettings() {
         </Button>
         <div>
           <h1 className="text-lg font-bold text-foreground">
-            App Settings
+            {t("appSettings")}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Customize your app experience
+            {t("customizeExperience")}
           </p>
         </div>
       </div>
@@ -55,16 +58,16 @@ export default function AppSettings() {
           <CardContent className="p-0 divide-y divide-border">
             <SettingRow
               icon={isDark ? Moon : Sun}
-              label="Dark Mode"
-              description="Switch between light & dark theme"
+              label={t("darkMode")}
+              description={t("darkModeDesc")}
             >
               <Switch checked={isDark} onCheckedChange={toggleTheme} />
             </SettingRow>
 
             <SettingRow
               icon={Bell}
-              label="Sound Alerts"
-              description="Play sound for new orders"
+              label={t("soundAlerts")}
+              description={t("soundAlertsDesc")}
             >
               <Switch
                 checked={soundEnabled}
@@ -74,8 +77,8 @@ export default function AppSettings() {
 
             <SettingRow
               icon={Power}
-              label="Auto Go Online"
-              description="Automatically go online when app opens"
+              label={t("autoOnline")}
+              description={t("autoOnlineDesc")}
             >
               <Switch
                 checked={autoOnline}
@@ -90,17 +93,17 @@ export default function AppSettings() {
           <CardContent className="p-0">
             <SettingRow
               icon={Languages}
-              label="Language"
-              description="Select your preferred language"
+              label={t("language")}
+              description={t("selectLanguage")}
             >
-              <Select value={language} onValueChange={setLanguage}>
+              <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
                 <SelectTrigger className="w-[120px]">
                   <SelectValue placeholder="Language" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="English">English</SelectItem>
-                  <SelectItem value="Tamil">Tamil</SelectItem>
-                  <SelectItem value="Hindi">Hindi</SelectItem>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="ta">தமிழ் (Tamil)</SelectItem>
+                  <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>
@@ -116,7 +119,7 @@ export default function AppSettings() {
           onClick={clearAppData}
         >
           <Trash2 className="w-4 h-4 mr-2" />
-          Clear App Data
+          {t("clearAppData")}
         </Button>
       </div>
     </div>

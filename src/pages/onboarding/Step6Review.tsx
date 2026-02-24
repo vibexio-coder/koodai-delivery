@@ -11,8 +11,17 @@ import {
 import { toast } from "sonner";
 
 import { db } from "../../firebase/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, getDocs, query, where } from "firebase/firestore";
 import { useOnboardingStore } from "../../store/useOnboardingStore";
+
+/* ---------- ID GENERATOR ---------- */
+const generateDeliveryPartnerId = async (city: string): Promise<string> => {
+    const cityCode = city.slice(0, 3).toUpperCase();
+    const q = query(collection(db, "delivery"), where("basicInfo.city", "==", city));
+    const snap = await getDocs(q);
+    const nextNum = snap.size + 1;
+    return `${cityCode}-DP-${String(nextNum).padStart(4, "0")}`;
+};
 
 export default function Step6Review() {
     const navigate = useNavigate();
@@ -40,8 +49,12 @@ export default function Step6Review() {
         try {
             setSubmitting(true);
 
+            // Generate unique Delivery Partner ID
+            const deliveryPartnerId = await generateDeliveryPartnerId(basicInfo!.city);
+
             // Construct payload
             const payload = {
+                deliveryPartnerId,
                 basicInfo,
                 permissions,
                 vehicle,

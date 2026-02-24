@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { Home, Package, DollarSign, User } from "lucide-react";
+import { t } from "../i18n/translations";
 
 export function BottomNav() {
   const navigate = useNavigate();
@@ -9,22 +10,22 @@ export function BottomNav() {
     {
       path: "/dashboard",
       icon: Home,
-      label: "Home",
+      label: t("navHome"),
     },
     {
       path: "/dashboard/orders",
       icon: Package,
-      label: "Orders",
+      label: t("navOrders"),
     },
     {
       path: "/dashboard/earnings",
       icon: DollarSign,
-      label: "Earnings",
+      label: t("navEarnings"),
     },
     {
       path: "/dashboard/profile",
       icon: User,
-      label: "Profile",
+      label: t("navProfile"),
     },
   ];
 
@@ -56,16 +57,16 @@ export function BottomNav() {
               >
                 <item.icon
                   className={`w-5 h-5 ${active
-                      ? "text-primary-foreground"
-                      : "text-muted-foreground"
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground"
                     }`}
                 />
               </div>
 
               <span
                 className={`text-xs font-medium ${active
-                    ? "text-foreground"
-                    : "text-muted-foreground"
+                  ? "text-foreground"
+                  : "text-muted-foreground"
                   }`}
               >
                 {item.label}

@@ -7,13 +7,16 @@ import {
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 
+import { t } from "../../i18n/translations";
+// ...
+
 export default function Earnings() {
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       {/* Header */}
       <div className="bg-primary text-primary-foreground p-6 pb-12 rounded-b-3xl">
         <h1 className="text-sm font-medium text-yellow-900 mb-1">
-          Total Earnings
+          {t("totalEarnings")}
         </h1>
 
         <div className="flex items-end gap-2 mb-6">
@@ -26,7 +29,7 @@ export default function Earnings() {
         <div className="flex gap-4">
           <Button className="flex-1 bg-black/90 text-white hover:bg-black">
             <Wallet className="w-4 h-4 mr-2" />
-            Withdraw
+            {t("withdraw")}
           </Button>
 
           <Button
@@ -34,7 +37,7 @@ export default function Earnings() {
             className="flex-1 border-black/30 text-black hover:bg-black/10"
           >
             <CreditCard className="w-4 h-4 mr-2" />
-            History
+            {t("history")}
           </Button>
         </div>
       </div>
@@ -45,7 +48,7 @@ export default function Earnings() {
         <Card className="border-none rounded-2xl bg-card">
           <CardHeader>
             <CardTitle className="text-base text-foreground">
-              Weekly Breakdown
+              {t("weeklyBreakdown")}
             </CardTitle>
           </CardHeader>
 
@@ -73,7 +76,7 @@ export default function Earnings() {
 
         {/* Recent Payouts */}
         <h2 className="font-bold text-lg px-1 text-foreground">
-          Recent Payouts
+          {t("recentPayouts")}
         </h2>
 
         {[1, 2, 3].map((_, i) => (
@@ -89,7 +92,7 @@ export default function Earnings() {
 
                 <div>
                   <p className="font-medium text-sm text-foreground">
-                    Weekly Payout
+                    {t("weeklyPayout")}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Oct {20 - i * 7}, 2024

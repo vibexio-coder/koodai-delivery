@@ -1,83 +1,100 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+  /* ===== KOODAI BRAND METRICS FROM CONSUMER ===== */
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: #09090b;
-  --card: #ffffff;
-  --card-foreground: #09090b;
-  --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #ffc107;
-  --primary-foreground: #000000;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
-  --destructive: #ef4444;
-  --destructive-foreground: #fafafa;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --input-background: #ffffff;
-  --switch-background: #e4e4e7;
-  --ring: #ffc107;
-  --radius: 0.5rem;
-  --chart-1: #e76e50;
-  --chart-2: #2a9d90;
-  --chart-3: #274754;
-  --chart-4: #e8c468;
-  --chart-5: #f4a462;
-  --font-weight-medium: 500;
+  --background: #FAFAFA;
+  --foreground: #1A1A1A;
+
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+
+  --primary: #FFC107;
+  --primary-foreground: #1A1A1A;
+
+  --secondary: #FFF8E1;
+  --secondary-foreground: #1A1A1A;
+
+  --muted: #F5F5F5;
+  --muted-foreground: #666666;
+
+  --accent: #FFB300;
+  --accent-foreground: #1A1A1A;
+
+  --destructive: #D32F2F;
+  --destructive-foreground: #FFFFFF;
+
+  --border: rgba(0, 0, 0, 0.08);
+  /* Consumer border var */
+  --input: transparent;
+  --input-background: #F5F5F5;
+  --switch-background: #CBCED4;
+
+  --ring: #FFC107;
+  --radius: 16px;
+  /* 1rem rounded-2xl enforcing default */
+
+  /* Charts */
+  --chart-1: #FFC107;
+  --chart-2: #4CAF50;
+  --chart-3: #2196F3;
+  --chart-4: #FF5722;
+  --chart-5: #9C27B0;
+
+  /* Fonts */
+  --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #09090b;
-  --sidebar-primary: #18181b;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #18181b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #ffc107;
-  --yellow-light: #fff9e6;
-  --yellow-primary: #ffc107;
-  --yellow-dark: #ffb300;
+
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A1A1A;
+  --sidebar-primary: #FFC107;
+  --sidebar-primary-foreground: #1A1A1A;
+  --sidebar-accent: #FFF8E1;
+  --sidebar-accent-foreground: #1A1A1A;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
+  --sidebar-ring: #FFC107;
+
+  /* Legacy Compat */
+  --yellow-light: #FFF8E1;
+  --yellow-primary: #FFC107;
+  --yellow-dark: #FFB300;
 }
 
+/* Actual Dark Theme Variables */
 .dark {
-  --background: #000000;
+  --background: #09090b;
   --foreground: #fafafa;
-  --card: #09090b;
+  --card: #18181b;
   --card-foreground: #fafafa;
   --popover: #09090b;
   --popover-foreground: #fafafa;
-  --primary: #ffc107;
-  --primary-foreground: #000000;
+  --primary: #FFC107;
+  --primary-foreground: #18181b;
   --secondary: #27272a;
   --secondary-foreground: #fafafa;
   --muted: #27272a;
   --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
+  --accent: #FFB300;
+  --accent-foreground: #18181b;
   --destructive: #7f1d1d;
   --destructive-foreground: #fafafa;
-  --border: #27272a;
-  --input: #27272a;
-  --input-background: #09090b;
-  --ring: #ffc107;
-  --chart-1: #220afb;
-  --chart-2: #2a9d90;
-  --chart-3: #274754;
-  --chart-4: #e8c468;
-  --chart-5: #f4a462;
-  --sidebar: #09090b;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: transparent;
+  --input-background: #27272a;
+  --switch-background: #3f3f46;
+  --ring: #FFC107;
+  --sidebar: #18181b;
   --sidebar-foreground: #fafafa;
-  --sidebar-primary: #18181b;
-  --sidebar-primary-foreground: #fafafa;
+  --sidebar-primary: #FFC107;
+  --sidebar-primary-foreground: #18181b;
   --sidebar-accent: #27272a;
   --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #ffc107;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #FFC107;
 }
 
 @theme inline {
@@ -121,67 +138,6 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* ============================================================
-   ORDER CARD ANIMATIONS
-   ============================================================ */
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,193,7,0.45); }
-  50%       { box-shadow: 0 0 0 10px rgba(255,193,7,0); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes progressFill {
-  from { width: 0%; }
-  to   { width: 100%; }
-}
-@keyframes shakeBrief {
-  0%,100% { transform: translateX(0); }
-  20%     { transform: translateX(-5px); }
-  40%     { transform: translateX(5px); }
-  60%     { transform: translateX(-4px); }
-  80%     { transform: translateX(4px); }
-}
-@keyframes successPop {
-  0%   { transform: scale(0.6); opacity: 0; }
-  70%  { transform: scale(1.15); opacity: 1; }
-  100% { transform: scale(1); }
-}
-@keyframes confettiFade {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-18px) scale(0.6); }
-}
-@keyframes borderGlow {
-  0%, 100% { border-color: rgba(34,197,94,0.5); }
-  50%       { border-color: rgba(34,197,94,1); }
-}
-@keyframes dotBounce {
-  0%,80%,100% { transform: translateY(0); }
-  40%         { transform: translateY(-5px); }
-}
-
-.order-card-enter     { animation: slideUp 0.32s cubic-bezier(.21,1.02,.73,1) both; }
-.glow-pulse           { animation: glowPulse 1.6s ease-in-out infinite; }
-.shimmer-bar          {
-  background: linear-gradient(90deg,
-    var(--muted) 25%, rgba(255,255,255,.7) 50%, var(--muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-.shake                { animation: shakeBrief 0.38s ease; }
-.success-pop          { animation: successPop 0.45s cubic-bezier(.21,1.02,.73,1) both; }
-.confetti-dot         { animation: confettiFade 0.7s ease forwards; }
-.progress-bar-fill    { animation: progressFill 1.4s ease forwards; }
-.border-glow-green    { animation: borderGlow 1.8s ease-in-out infinite; }
-.dot-bounce-1 { animation: dotBounce 1.2s ease-in-out infinite 0s; }
-.dot-bounce-2 { animation: dotBounce 1.2s ease-in-out infinite 0.2s; }
-.dot-bounce-3 { animation: dotBounce 1.2s ease-in-out infinite 0.4s; }
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -189,56 +145,20 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
+}
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
+/* Base custom classes matching consumer UI */
+.btn-yellow {
+  background-color: var(--koodai-yellow, #FFC107);
+  color: #1A1A1A;
+  font-weight: 700;
+  border-radius: 16px;
+  transition: transform 0.1s ease;
+}
 
-  html {
-    font-size: var(--font-size);
-  }
-
-  h1 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  button {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  input {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
-  }
+.btn-yellow:active {
+  background-color: var(--koodai-yellow-dark, #FFB300);
+  transform: scale(0.98);
 }

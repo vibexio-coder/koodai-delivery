@@ -1,157 +1,104 @@
 import { useState } from "react";
-import { Moon, Sun, Bell, Power, Trash2, Languages, ChevronLeft } from "lucide-react";
+import { Moon, Bell, Power, Trash2, Languages, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "../../components/ui/card";
 import { Switch } from "../../components/ui/switch";
-import { Button } from "../../components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import { toast } from "sonner";
-import { useTheme } from "../../context/ThemeContext";
-
 import { t } from "../../i18n/translations";
 import { useAppStore } from "../../store/useAppStore";
 
 export default function AppSettings() {
-  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  const { language, setLanguage } = useAppStore(); // Use global language state
+  const { language, setLanguage, darkMode, toggleDarkMode, autoOnline, setAutoOnline } = useAppStore();
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [autoOnline, setAutoOnline] = useState(false);
 
   const clearAppData = () => {
     localStorage.clear();
-    toast.success(t("dataCleared"));
+    toast.success(t("dataCleared") || "App data cleared successfully");
     setTimeout(() => window.location.reload(), 800);
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background pb-20">
+    <div className="flex flex-col min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="bg-background p-4 border-b border-border flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="-ml-2"
-          onClick={() => navigate(-1)}
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
+      <div className="bg-card p-4 pt-10 flex items-center gap-3 border-b border-border sticky top-0 z-10 shadow-sm">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-muted active:scale-95 transition-transform">
+          <ArrowLeft className="w-5 h-5 text-foreground" />
+        </button>
         <div>
-          <h1 className="text-lg font-bold text-foreground">
-            {t("appSettings")}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {t("customizeExperience")}
-          </p>
+          <h1 className="text-[16px] font-bold text-foreground">Settings</h1>
+          <p className="text-[12px] font-medium text-muted-foreground">Customize your experience</p>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 max-w-md mx-auto w-full">
         {/* Preferences */}
-        <Card className="border-none rounded-2xl bg-card">
-          <CardContent className="p-0 divide-y divide-border">
-            <SettingRow
-              icon={isDark ? Moon : Sun}
-              label={t("darkMode")}
-              description={t("darkModeDesc")}
-            >
-              <Switch checked={isDark} onCheckedChange={toggleTheme} />
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="bg-muted px-4 py-3 border-b border-border">
+            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">App Preferences</h2>
+          </div>
+          <div className="divide-y divide-border">
+            <SettingRow icon={Moon} label="Dark Mode" description="Switch between light and dark themes">
+              <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
             </SettingRow>
-
-            <SettingRow
-              icon={Bell}
-              label={t("soundAlerts")}
-              description={t("soundAlertsDesc")}
-            >
-              <Switch
-                checked={soundEnabled}
-                onCheckedChange={setSoundEnabled}
-              />
+            <SettingRow icon={Bell} label="Sound Alerts" description="Play sounds for new orders">
+              <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
             </SettingRow>
-
-            <SettingRow
-              icon={Power}
-              label={t("autoOnline")}
-              description={t("autoOnlineDesc")}
-            >
-              <Switch
-                checked={autoOnline}
-                onCheckedChange={setAutoOnline}
-              />
+            <SettingRow icon={Power} label="Auto Online" description="Go online when app opens">
+              <Switch checked={autoOnline} onCheckedChange={setAutoOnline} />
             </SettingRow>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Language */}
-        <Card className="border-none rounded-2xl bg-card">
-          <CardContent className="p-0">
-            <SettingRow
-              icon={Languages}
-              label={t("language")}
-              description={t("selectLanguage")}
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="bg-muted px-4 py-3 border-b border-border">
+            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">Localization</h2>
+          </div>
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-background border border-border/10 flex items-center justify-center">
+                <Languages className="w-5 h-5 text-foreground" />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold text-foreground">Language</p>
+                <p className="text-[12px] font-medium text-muted-foreground">Select app language</p>
+              </div>
+            </div>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as any)}
+              className="bg-background border border-border text-foreground text-[13px] font-bold rounded-xl px-3 py-2 outline-none focus:border-primary transition-colors"
             >
-              <Select value={language} onValueChange={(val: any) => setLanguage(val)}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Language" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ta">தமிழ் (Tamil)</SelectItem>
-                  <SelectItem value="hi">हिंदी (Hindi)</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingRow>
-          </CardContent>
-        </Card>
+              <option value="en">English</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="hi">हिंदी (Hindi)</option>
+            </select>
+          </div>
+        </div>
 
         {/* Clear Data */}
-        <Button
-          variant="outline"
-          className="w-full border-red-200 dark:border-red-900
-            text-red-600 dark:text-red-400
-            hover:bg-red-50 dark:hover:bg-red-500/10"
+        <button
           onClick={clearAppData}
+          className="w-full mt-4 bg-card border border-destructive/30 text-destructive hover:bg-destructive/5 active:scale-[0.98] transition-all font-bold p-4 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-[15px]"
         >
-          <Trash2 className="w-4 h-4 mr-2" />
-          {t("clearAppData")}
-        </Button>
+          <Trash2 className="w-5 h-5" />
+          Clear App Data
+        </button>
       </div>
     </div>
   );
 }
 
-/* ---------- Row Component ---------- */
-
-function SettingRow({
-  icon: Icon,
-  label,
-  description,
-  children,
-}: {
-  icon: any;
-  label: string;
-  description: string;
-  children: React.ReactNode;
-}) {
+function SettingRow({ icon: Icon, label, description, disabled, children }: any) {
   return (
-    <div className="flex items-center justify-between px-4 py-4">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-500/20">
-          <Icon className="w-5 h-5 text-yellow-700 dark:text-yellow-400" />
+    <div className={`flex items-center justify-between p-4 ${disabled ? 'opacity-60' : ''}`}>
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-background border border-border/10 flex items-center justify-center">
+          <Icon className="w-5 h-5 text-foreground" strokeWidth={2} />
         </div>
         <div>
-          <p className="text-sm font-medium text-foreground">
-            {label}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {description}
-          </p>
+          <p className="text-[15px] font-bold text-foreground">{label}</p>
+          <p className="text-[12px] font-medium text-muted-foreground">{description}</p>
         </div>
       </div>
       {children}

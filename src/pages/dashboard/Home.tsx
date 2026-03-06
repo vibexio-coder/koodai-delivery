@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { User, Navigation, Package, MapPin, Store, Check, Truck, Star } from "lucide-react";
+import { User, Navigation, Package, MapPin, Store, Check, Truck, Star, ArrowRight, TrendingUp, Clock, ShieldCheck } from "lucide-react";
 import { Switch } from "../../components/ui/switch";
-import { Card, CardContent } from "../../components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import {
   doc, getDoc, collection, query, where, onSnapshot,
   collectionGroup, updateDoc
@@ -10,15 +8,15 @@ import {
 import { db } from "../../firebase/firebase";
 import { Order } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
-import { t } from "../../i18n/translations";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ─────────────────────────────────────────────
-   Step Progress Indicator
+   Step Progress Indicator - Premium Refined
 ───────────────────────────────────────────── */
 const STEPS = [
   { key: "pending_acceptance", label: "Received" },
   { key: "accepted", label: "Accepted" },
-  { key: "picked_up", label: "Picked Up" },
+  { key: "picked_up", label: "In Transit" },
   { key: "delivered", label: "Delivered" },
 ];
 
@@ -30,39 +28,46 @@ function getStepIndex(status: string) {
 function StepProgress({ status }: { status: string }) {
   const current = getStepIndex(status);
   return (
-    <div className="w-full px-1 pt-1 pb-2">
-      <div className="flex items-center justify-between relative">
-        {/* Track line */}
-        <div className="absolute left-0 right-0 top-[11px] h-[2px] bg-border mx-[14px] z-0" />
-        {/* Filled track */}
-        <div
-          className="absolute left-0 top-[11px] h-[2px] bg-yellow-400 z-0 transition-all duration-700 ease-in-out mx-[14px]"
-          style={{ width: current === 0 ? "0%" : `calc(${(current / (STEPS.length - 1)) * 100}% - 0px)` }}
+    <div className="w-full px-2 py-4">
+      <div className="flex items-center justify-between relative px-1">
+        {/* Background Track */}
+        <div className="absolute left-0 right-0 top-[11px] h-[3px] bg-border rounded-full z-0 mx-[14px]" />
+
+        {/* Active Progress Fill */}
+        <motion.div
+          className="absolute left-0 top-[11px] h-[3px] bg-primary rounded-full z-0 mx-[14px]"
+          initial={{ width: 0 }}
+          animate={{ width: `calc(${(current / (STEPS.length - 1)) * 100}% - 0px)` }}
+          transition={{ duration: 0.8, ease: "circOut" }}
         />
 
         {STEPS.map((step, i) => {
           const done = i < current;
           const active = i === current;
           const future = i > current;
+
           return (
-            <div key={step.key} className="flex flex-col items-center z-10 gap-1">
-              <div
-                className={`w-[22px] h-[22px] rounded-full flex items-center justify-center border-2 transition-all duration-500
-                  ${done ? "bg-green-500 border-green-500 success-pop" : ""}
-                  ${active ? "bg-yellow-400 border-yellow-400 scale-110 shadow-sm" : ""}
-                  ${future ? "bg-background border-border" : ""}
-                `}
+            <div key={step.key} className="flex flex-col items-center z-10 gap-2">
+              <motion.div
+                initial={false}
+                animate={{
+                  scale: active ? 1.15 : 1,
+                  backgroundColor: done ? "#4CAF50" : active ? "#FFC107" : "#FFFFFF",
+                  borderColor: done ? "#4CAF50" : active ? "#FFC107" : "var(--border)",
+                }}
+                className={`w-[24px] h-[24px] rounded-full border-2 flex items-center justify-center transition-colors shadow-sm`}
               >
-                {done && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                {active && <div className="w-2 h-2 bg-black rounded-full" />}
-              </div>
+                {done ? (
+                  <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                ) : active ? (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                ) : null}
+              </motion.div>
               <span
-                className={`text-[9px] font-semibold text-center leading-tight transition-colors duration-300
-                  ${done ? "text-green-600" : ""}
-                  ${active ? "text-yellow-600" : ""}
-                  ${future ? "text-muted-foreground" : ""}
+                className={`text-[10px] font-bold text-center leading-tight transition-colors duration-300
+                  ${done ? "text-[#4CAF50]" : active ? "text-foreground" : "text-muted-foreground"}
                 `}
-                style={{ maxWidth: 44 }}
+                style={{ maxWidth: 50 }}
               >
                 {step.label}
               </span>
@@ -75,62 +80,35 @@ function StepProgress({ status }: { status: string }) {
 }
 
 /* ─────────────────────────────────────────────
-   Confetti micro-dots (delivered state)
-───────────────────────────────────────────── */
-function ConfettiDots() {
-  const dots = ["🟡", "🟢", "⚪", "🟡", "🟢"];
-  return (
-    <div className="flex justify-center gap-1 mb-1">
-      {dots.map((d, i) => (
-        <span
-          key={i}
-          className="confetti-dot text-[8px]"
-          style={{ animationDelay: `${i * 80}ms` }}
-        >
-          {d}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Slide-to-Confirm Action
-   Usage:
-     <SlideAction label="Slide to Accept" color="yellow" onConfirm={fn} />
-     <SlideAction label="Slide to Decline" color="red"    onConfirm={fn} direction="left" />
+   Slide-to-Confirm Action - Tactile & Premium
 ───────────────────────────────────────────── */
 interface SlideActionProps {
   label: string;
-  color: "yellow" | "red" | "purple" | "green";
+  color: "yellow" | "success" | "pending";
   onConfirm: () => void;
   loading?: boolean;
-  icon?: React.ReactNode;
   direction?: "right" | "left";
 }
 
-const TRACK_COLORS = {
-  yellow: { track: "bg-yellow-100 dark:bg-yellow-500/20", thumb: "bg-yellow-400", label: "text-yellow-700 dark:text-yellow-300", fill: "bg-yellow-300/60" },
-  red: { track: "bg-red-50   dark:bg-red-500/10", thumb: "bg-red-500", label: "text-red-500   dark:text-red-400", fill: "bg-red-300/50" },
-  purple: { track: "bg-purple-50 dark:bg-purple-500/10", thumb: "bg-purple-500", label: "text-purple-700 dark:text-purple-300", fill: "bg-purple-300/50" },
-  green: { track: "bg-green-50  dark:bg-green-500/10", thumb: "bg-green-500", label: "text-green-700  dark:text-green-400", fill: "bg-green-300/50" },
+const TRACK_THEMES = {
+  yellow: { track: "bg-secondary", thumb: "bg-primary", label: "text-accent", fill: "bg-primary/10" },
+  success: { track: "bg-[#E8F5E9]", thumb: "bg-[#4CAF50]", label: "text-[#2E7D32]", fill: "bg-[#4CAF50]/10" },
+  pending: { track: "bg-muted", thumb: "bg-muted-foreground", label: "text-muted-foreground", fill: "bg-muted-foreground/10" },
 };
 
-function SlideAction({ label, color, onConfirm, loading = false, icon, direction = "right" }: SlideActionProps) {
+function SlideAction({ label, color, onConfirm, loading = false, direction = "right" }: SlideActionProps) {
   const trackRef = useRef<HTMLDivElement>(null);
-  const thumbRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
   const [done, setDone] = useState(false);
   const startX = useRef(0);
   const dragging = useRef(false);
-  const THUMB_W = 52;
+  const THUMB_W = 60;
 
-  // Reset when loading finishes (parent re-renders)
   useEffect(() => {
     if (!loading) { setOffset(0); setDone(false); }
   }, [loading]);
 
-  const trackWidth = () => (trackRef.current?.offsetWidth ?? 280) - THUMB_W - 8;
+  const trackWidth = () => (trackRef.current?.offsetWidth ?? 300) - THUMB_W - 8;
   const isLeft = direction === "left";
 
   const onStart = (clientX: number) => {
@@ -160,70 +138,58 @@ function SlideAction({ label, color, onConfirm, loading = false, icon, direction
     }
   };
 
-  const max = typeof window !== "undefined" ? trackWidth() : 230;
+  const max = typeof window !== "undefined" ? trackWidth() : 240;
   const progress = offset / max;
-  const colors = TRACK_COLORS[color];
+  const theme = TRACK_THEMES[color];
 
   return (
     <div
       ref={trackRef}
-      className={`relative h-[52px] rounded-2xl overflow-hidden select-none touch-none ${colors.track} border border-black/5`}
+      className={`relative h-[64px] rounded-2xl overflow-hidden select-none touch-none border border-black/5 shadow-inner ${theme.track}`}
       onMouseMove={(e) => onMove(e.clientX)}
       onMouseUp={onEnd}
       onMouseLeave={onEnd}
       onTouchMove={(e) => onMove(e.touches[0].clientX)}
       onTouchEnd={onEnd}
     >
-      {/* Fill behind thumb */}
+      {/* Background Progress Fill */}
       <div
-        className={`absolute top-0 bottom-0 ${colors.fill} transition-none`}
-        style={isLeft
-          ? { right: 0, width: offset + THUMB_W / 2 }
-          : { left: 0, width: offset + THUMB_W / 2 }}
+        className={`absolute top-0 bottom-0 ${theme.fill} transition-none`}
+        style={isLeft ? { right: 0, width: offset + THUMB_W } : { left: 0, width: offset + THUMB_W }}
       />
 
-      {/* Label — fades as thumb moves */}
+      {/* Centered Label */}
       <div
-        className={`absolute inset-0 flex items-center justify-center gap-2 text-sm font-bold pointer-events-none ${colors.label}`}
-        style={{ opacity: 1 - progress * 1.4 }}
+        className={`absolute inset-0 flex items-center justify-center gap-3 text-[16px] font-extrabold pointer-events-none tracking-tight ${theme.label}`}
+        style={{ opacity: 1 - progress * 1.5 }}
       >
-        <span className="opacity-50 text-lg">{isLeft ? "←" : "→"}</span>
+        <motion.div animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+          {isLeft ? <ArrowRight className="rotate-180 opacity-50 w-5 h-5" /> : <ArrowRight className="opacity-50 w-5 h-5" />}
+        </motion.div>
         {label}
       </div>
 
-      {/* Thumb */}
-      <div
-        ref={thumbRef}
-        className={`absolute top-[4px] bottom-[4px] w-[${THUMB_W}px] rounded-xl ${colors.thumb}
-          flex items-center justify-center shadow-md cursor-grab active:cursor-grabbing
-          transition-shadow duration-150`}
-        style={{
-          width: THUMB_W,
-          ...(isLeft
-            ? { right: 4 + offset }
-            : { left: 4 + offset }),
-        }}
+      {/* Draggable Thumb */}
+      <motion.div
+        className={`absolute top-[6px] bottom-[6px] rounded-xl ${theme.thumb} flex items-center justify-center shadow-lg cursor-grab active:cursor-grabbing z-10`}
+        style={{ width: THUMB_W, ...(isLeft ? { right: 6 + offset } : { left: 6 + offset }) }}
         onMouseDown={(e) => { e.preventDefault(); onStart(e.clientX); }}
         onTouchStart={(e) => { onStart(e.touches[0].clientX); }}
       >
         {loading ? (
-          <div className="flex gap-0.5">
-            {[0, 1, 2].map(i => (
-              <span key={i} className={`dot-bounce-${i + 1} inline-block w-1.5 h-1.5 bg-white rounded-full`} />
-            ))}
-          </div>
+          <div className="w-6 h-6 rounded-full border-3 border-white/30 border-t-white animate-spin" />
         ) : done ? (
-          <Check className="w-5 h-5 text-white" strokeWidth={3} />
+          <Check className="w-8 h-8 text-white" strokeWidth={3} />
         ) : (
-          <span className="text-white text-lg select-none">{isLeft ? "←" : "→"}</span>
+          <ArrowRight className={`w-6 h-6 ${color === 'yellow' ? 'text-foreground' : 'text-white'} ${isLeft ? 'rotate-180' : ''}`} strokeWidth={3} />
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────
-   Single Order Card
+   Single Order Card - Elevated Design
 ───────────────────────────────────────────── */
 interface IncomingOrder {
   storeOrderPath: string;
@@ -246,185 +212,144 @@ function OrderCard({
   actionLoading: string | null;
   onAction: (path: string, status: "accepted" | "declined" | "picked_up" | "delivered") => void;
 }) {
-  const [justDelivered, setJustDelivered] = useState(false);
-  const mountedRef = useRef(false);
   const isNew = order.deliveryStatus === "pending_acceptance";
   const isAccepted = order.deliveryStatus === "accepted";
   const isPickedUp = order.deliveryStatus === "picked_up";
   const isDelivered = order.deliveryStatus === "delivered";
 
-  useEffect(() => {
-    if (!mountedRef.current && isDelivered) setJustDelivered(true);
-    mountedRef.current = true;
-  }, [isDelivered]);
-
   const dropLabel =
     typeof order.deliveryAddress === "object"
-      ? order.deliveryAddress?.area ||
-      order.deliveryAddress?.city ||
-      order.deliveryAddress?.street ||
-      "See details"
+      ? order.deliveryAddress?.area || order.deliveryAddress?.city || order.deliveryAddress?.street || "See details"
       : order.deliveryAddress || "—";
 
-  /* Border colour by status */
-  const borderClass =
-    isNew ? "border-yellow-400 glow-pulse" :
-      isAccepted ? "border-green-400 border-glow-green" :
-        isPickedUp ? "border-purple-400" :
-          isDelivered ? "border-green-500" : "border-border";
-
   return (
-    <div
-      className={`order-card-enter rounded-2xl border-2 bg-card shadow-md transition-all duration-500 overflow-hidden
-        ${borderClass}
-        ${isDelivered ? "shadow-green-200 dark:shadow-green-900" : ""}
-      `}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-card rounded-[24px] border border-border shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden mb-5 flex flex-col pt-5"
     >
-      {/* ── HEADER ── */}
-      <div className="px-4 pt-4 pb-3">
+      {/* Card Body */}
+      <div className="px-5 pb-5">
         <div className="flex justify-between items-start">
-          <div>
-            <p className="text-sm font-bold tracking-wider text-foreground">
-              #{order.orderId.slice(0, 8).toUpperCase()}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">{order.storeName}</p>
+          <div className="space-y-0.5">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Order ID</span>
+            <p className="text-[15px] font-black text-foreground">#{order.orderId.slice(0, 8).toUpperCase()}</p>
           </div>
           <div className="text-right">
-            <p className="text-lg font-extrabold text-foreground">₹{order.storeTotal}</p>
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full
-              ${isNew ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400" : ""}
-              ${isAccepted ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400" : ""}
-              ${isPickedUp ? "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400" : ""}
-              ${isDelivered ? "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-400" : ""}
-            `}>
-              {isNew && "New Request"}
-              {isAccepted && "✔ Accepted"}
-              {isPickedUp && "🚚 In Transit"}
-              {isDelivered && "✅ Delivered"}
-            </span>
+            <p className="text-[22px] font-black text-foreground tracking-tighter">₹{order.storeTotal}</p>
+            <div className={`mt-1 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider
+               ${isNew ? "bg-secondary text-accent" : "bg-[#E8F5E9] text-[#2E7D32]"}
+             `}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isNew ? 'bg-accent animate-pulse' : 'bg-[#2E7D32]'}`} />
+              {isNew ? "New Request" : order.deliveryStatus.replace('_', ' ')}
+            </div>
+          </div>
+        </div>
+
+        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent my-5" />
+
+        <div className="relative pl-7 space-y-6">
+          {/* Vertical Path Line */}
+          <div className="absolute left-[11px] top-[10px] bottom-[10px] w-0.5 bg-dashed border-l-2 border-dashed border-border" />
+
+          <div className="relative">
+            <div className="absolute -left-7 w-[22px] h-[22px] bg-secondary rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+              <Store className="w-3 h-3 text-accent" />
+            </div>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pickup From</p>
+            <p className="text-[14px] font-extrabold text-foreground">{order.storeName}</p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -left-7 w-[22px] h-[22px] bg-[#E8F5E9] rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+              <MapPin className="w-3 h-3 text-[#4CAF50]" />
+            </div>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Deliver To</p>
+            <p className="text-[14px] font-extrabold text-foreground truncate">{dropLabel}</p>
           </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px bg-border mx-4" />
-
-      {/* ── ROUTE INFO ── */}
-      <div className="px-4 py-3 space-y-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center shrink-0">
-            <Store className="w-3 h-3 text-yellow-600 dark:text-yellow-400" />
-          </div>
-          <p className="text-xs font-medium text-foreground">Pickup: {order.storeName}</p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-red-50 dark:bg-red-500/20 flex items-center justify-center shrink-0">
-            <MapPin className="w-3 h-3 text-red-500" />
-          </div>
-          <p className="text-xs font-medium text-foreground">Drop: {dropLabel}</p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-500/20 flex items-center justify-center shrink-0">
-            <User className="w-3 h-3 text-blue-500" />
-          </div>
-          <p className="text-xs font-medium text-foreground">{order.customerName}</p>
-        </div>
-      </div>
-
-      {/* ── STEP PROGRESS ── */}
-      <div className="px-4 pb-1">
+      {/* Progress Section */}
+      <div className="bg-muted/30 px-4 py-2 border-t border-border">
         <StepProgress status={order.deliveryStatus} />
       </div>
 
-      {/* ── ACTIONS ── */}
-      <div className="px-4 pb-4 space-y-2.5">
-
-        {/* ① NEW REQUEST — slide Accept right, slide Decline left */}
+      {/* Action Footer */}
+      <div className="p-5 bg-background border-t border-border">
         {isNew && (
-          <div className="space-y-2 pt-1">
-            <SlideAction
-              label="Slide to Accept"
-              color="yellow"
-              icon={<Check className="w-4 h-4" />}
-              loading={actionLoading === order.storeOrderPath + "accepted"}
-              onConfirm={() => onAction(order.storeOrderPath, "accepted")}
-            />
-            <SlideAction
-              label="Slide to Decline"
-              color="red"
-              direction="left"
-              loading={actionLoading === order.storeOrderPath + "declined"}
-              onConfirm={() => onAction(order.storeOrderPath, "declined")}
-            />
+          <div className="flex gap-4">
+            <button
+              onClick={() => onAction(order.storeOrderPath, "declined")}
+              disabled={actionLoading === order.storeOrderPath + "declined"}
+              className="flex-1 bg-white hover:bg-muted text-foreground font-black py-4 rounded-2xl transition-all border-2 border-border shadow-sm disabled:opacity-50"
+            >
+              Decline
+            </button>
+            <button
+              onClick={() => onAction(order.storeOrderPath, "accepted")}
+              disabled={actionLoading === order.storeOrderPath + "accepted"}
+              className="flex-1 btn-yellow py-4 shadow-lg shadow-primary/20 active:translate-y-0.5"
+            >
+              Accept Order
+            </button>
           </div>
         )}
 
-        {/* ② ACCEPTED — waiting or slide to pick up */}
         {isAccepted && (
-          order.storeStatus === "Out for Delivery" ? (
+          order.storeStatus === "Out for Delivery" || order.storeStatus === "Ready" ? (
             <SlideAction
               label="Slide — Picked Up"
-              color="purple"
-              icon={<Package className="w-4 h-4" />}
+              color="yellow"
               loading={actionLoading === order.storeOrderPath + "picked_up"}
               onConfirm={() => onAction(order.storeOrderPath, "picked_up")}
             />
           ) : (
-            /* Waiting shimmer state */
-            <div className="rounded-xl overflow-hidden">
-              <div className="shimmer-bar h-[3px]" />
-              <div className="bg-muted/60 rounded-b-xl px-4 py-3 flex items-center justify-center gap-2">
-                <span className="flex gap-1 items-center">
-                  <span className="dot-bounce-1 inline-block w-1.5 h-1.5 bg-muted-foreground rounded-full" />
-                  <span className="dot-bounce-2 inline-block w-1.5 h-1.5 bg-muted-foreground rounded-full" />
-                  <span className="dot-bounce-3 inline-block w-1.5 h-1.5 bg-muted-foreground rounded-full" />
-                </span>
-                <span className="text-xs text-muted-foreground font-medium">
-                  Waiting for store to pack…
-                </span>
+            <div className="bg-secondary rounded-[20px] p-5 flex items-center justify-between border border-primary/20">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Package className="w-6 h-6 text-accent" />
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="absolute inset-0 bg-primary/30 rounded-full -z-10"
+                  />
+                </div>
+                <div>
+                  <p className="text-[14px] font-black text-foreground">Waiting for Store</p>
+                  <p className="text-[11px] font-bold text-accent italic">Packing in progress...</p>
+                </div>
+              </div>
+              <div className="flex gap-1.5 items-end h-6">
+                {[0, 1, 2].map(i => (
+                  <motion.span
+                    key={i}
+                    animate={{ height: [8, 16, 8] }}
+                    transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.15 }}
+                    className="w-1 bg-primary rounded-full"
+                  />
+                ))}
               </div>
             </div>
           )
         )}
 
-        {/* ③ PICKED UP — slide to mark delivered */}
         {isPickedUp && (
-          <div className="space-y-2">
-            {/* Progress fill bar */}
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div className="progress-bar-fill h-full bg-gradient-to-r from-purple-400 to-green-400 rounded-full" />
-            </div>
-            <SlideAction
-              label="Slide — Delivered!"
-              color="green"
-              icon={<Truck className="w-4 h-4" />}
-              loading={actionLoading === order.storeOrderPath + "delivered"}
-              onConfirm={() => onAction(order.storeOrderPath, "delivered")}
-            />
-          </div>
-        )}
-
-        {/* ④ DELIVERED — success state */}
-        {isDelivered && (
-          <div className="flex flex-col items-center gap-1 py-2">
-            {justDelivered && <ConfettiDots />}
-            <div className="success-pop w-12 h-12 rounded-full bg-green-100 dark:bg-green-500/20
-                            flex items-center justify-center shadow-md shadow-green-200/60">
-              <Star className="w-6 h-6 text-green-500 fill-green-400" />
-            </div>
-            <p className="text-sm font-bold text-green-600 dark:text-green-400 mt-1">
-              Order Completed!
-            </p>
-            <p className="text-xs text-muted-foreground">Great job, keep it up 🎉</p>
-          </div>
+          <SlideAction
+            label="Slide — Delivered"
+            color="success"
+            loading={actionLoading === order.storeOrderPath + "delivered"}
+            onConfirm={() => onAction(order.storeOrderPath, "delivered")}
+          />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 /* ═══════════════════════════════════════════
-   HOME SCREEN
+   HOME SCREEN - Redefined Header & Hero
 ═══════════════════════════════════════════ */
 export default function Home() {
   const { isOnline, setOnline } = useAppStore();
@@ -434,7 +359,6 @@ export default function Home() {
   const [incomingOrders, setIncomingOrders] = useState<IncomingOrder[]>([]);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  /* ── FETCH PROFILE ── */
   useEffect(() => {
     const fetchProfile = async () => {
       const partnerId = localStorage.getItem("partnerId");
@@ -442,11 +366,7 @@ export default function Home() {
       try {
         const docRef = doc(db, "delivery", partnerId);
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          console.log("[DeliveryApp] Profile loaded. deliveryPartnerId =", data?.deliveryPartnerId);
-          setUserData(data);
-        }
+        if (docSnap.exists()) setUserData(docSnap.data());
       } catch (error) {
         console.error("Error fetching profile:", error);
       }
@@ -454,7 +374,6 @@ export default function Home() {
     fetchProfile();
   }, []);
 
-  /* ── TODAY'S STATS ── */
   useEffect(() => {
     const partnerId = localStorage.getItem("partnerId");
     if (!partnerId) return;
@@ -471,46 +390,27 @@ export default function Home() {
 
       snapshot.docs.forEach((docSnap) => {
         const data = docSnap.data() as Order;
-        const createdAt = data.createdAt?.toDate
-          ? data.createdAt.toDate()
-          : new Date(data.createdAt);
+        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
 
-        if (
-          createdAt >= startOfToday &&
-          createdAt <= endOfToday &&
-          (data.status === "completed" || data.status === "delivered")
-        ) {
+        if (createdAt >= startOfToday && createdAt <= endOfToday && (data.status === "completed" || data.status === "delivered")) {
           ordersCount++;
           earnings += Number(data.totalAmount) || 0;
         }
       });
-
       setTodayOrders(ordersCount);
       setTodayEarnings(earnings);
     });
-
     return () => unsubscribe();
   }, []);
 
-  /* ── INCOMING ORDER LISTENER ── */
   useEffect(() => {
     if (!isOnline) {
       setIncomingOrders([]);
       return;
     }
 
-    // Use the human-readable partner ID (e.g. 'CHE-DP-0002') from profile,
-    // OR fall back to the Firestore doc ID from localStorage while profile loads.
-    const deliveryPartnerId =
-      userData?.deliveryPartnerId ||
-      localStorage.getItem("partnerId");
-
-    if (!deliveryPartnerId) {
-      console.warn("[DeliveryApp] No deliveryPartnerId — cannot listen for orders");
-      return;
-    }
-
-    console.log("[DeliveryApp] 🔍 Order listener active for:", deliveryPartnerId);
+    const deliveryPartnerId = userData?.deliveryPartnerId || localStorage.getItem("partnerId");
+    if (!deliveryPartnerId) return;
 
     const q = query(
       collectionGroup(db, "storeOrders"),
@@ -519,11 +419,6 @@ export default function Home() {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      console.log("[DeliveryApp] 📦 Matched storeOrders:", snapshot.size);
-      snapshot.docs.forEach(d =>
-        console.log("  →", d.ref.path, "| delivery.status:", d.data().delivery?.status, "| storeStatus:", d.data().storeStatus)
-      );
-
       const orders: IncomingOrder[] = snapshot.docs.map((docSnap) => {
         const data = docSnap.data();
         return {
@@ -539,118 +434,196 @@ export default function Home() {
         };
       });
       setIncomingOrders(orders);
-    }, (err) => {
-      console.error("[DeliveryApp] order listener error:", err);
     });
-
     return () => unsubscribe();
   }, [isOnline, userData]);
 
-  /* ── ACCEPT / DECLINE ── */
-  const handleDeliveryAction = async (
-    storeOrderPath: string,
-    newStatus: "accepted" | "declined" | "picked_up" | "delivered"
-  ) => {
+  const handleDeliveryAction = async (storeOrderPath: string, newStatus: "accepted" | "declined" | "picked_up" | "delivered") => {
     setActionLoading(storeOrderPath + newStatus);
     try {
       const ref = doc(db, storeOrderPath);
       await updateDoc(ref, { "delivery.status": newStatus });
     } catch (err) {
-      console.error("Error updating delivery status:", err);
+      console.error("Error updates:", err);
     } finally {
       setActionLoading(null);
     }
   };
 
-  /* ── UI ── */
-  return (
-    <div className="flex flex-col min-h-screen bg-background pb-20">
-      {/* Header */}
-      <header className="bg-background border-b border-border p-4 sticky top-0 z-10 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={userData?.basicInfo?.profilePhoto || "https://github.com/shadcn.png"} />
-            <AvatarFallback>{userData?.basicInfo?.name?.[0] || "D"}</AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-sm font-bold text-foreground">
-              {userData?.basicInfo?.name || t("loading")}
-            </h1>
-            <p className="text-xs text-muted-foreground">ID: {userData?.deliveryPartnerId ?? "..."}</p>
-          </div>
-        </div>
+  const name = userData?.basicInfo?.name?.split(" ")[0] || "Partner";
 
-        <div className="flex items-center gap-2">
-          <span className={`text-xs font-semibold ${isOnline ? "text-green-500" : "text-gray-400"}`}>
-            {isOnline ? t("online") : t("offline")}
-          </span>
-          <Switch checked={isOnline} onCheckedChange={setOnline} />
+  return (
+    <div className="flex flex-col min-h-screen bg-[#FDFDFD] pb-32 relative">
+      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-secondary to-transparent pointer-events-none -z-10" />
+
+      {/* HEADER */}
+      <header className="sticky top-0 z-40 px-5 pt-8 pb-4 transition-all bg-secondary/80 backdrop-blur-md border-b border-primary/10">
+        <div className="flex justify-between items-center max-w-md mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border-2 border-primary shadow-sm overflow-hidden p-0.5">
+                {userData?.basicInfo?.profilePhoto ? (
+                  <img src={userData.basicInfo.profilePhoto} className="w-full h-full object-cover rounded-xl" alt="Avatar" />
+                ) : (
+                  <div className="w-full h-full bg-secondary flex items-center justify-center rounded-xl">
+                    <span className="text-[16px] font-black text-accent">{name[0]?.toUpperCase() || "P"}</span>
+                  </div>
+                )}
+              </div>
+              {isOnline && <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#4CAF50] rounded-full border-4 border-secondary" />}
+            </div>
+            <div>
+              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Hello,</p>
+              <h1 className="text-[18px] font-black text-foreground leading-tight">{name}</h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-white/50 border border-border px-4 py-2 rounded-2xl shadow-sm">
+            <div className="flex flex-col items-end">
+              <span className={`text-[12px] font-black tracking-tighter ${isOnline ? "text-[#2E7D32]" : "text-muted-foreground"}`}>
+                {isOnline ? "ONLINE" : "OFFLINE"}
+              </span>
+            </div>
+            <Switch checked={isOnline} onCheckedChange={setOnline} className="scale-90 data-[state=checked]:bg-[#4CAF50]" />
+          </div>
         </div>
       </header>
 
-      <main className="flex-1 p-4 space-y-4">
-        {/* Today's Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="bg-yellow-400 border-none rounded-2xl">
-            <CardContent className="p-4">
-              <p className="text-xs text-yellow-900">{t("earnings")}</p>
-              <p className="text-xl font-bold text-black">₹{todayEarnings.toLocaleString()}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-card rounded-2xl">
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{t("orders")}</p>
-              <p className="text-xl font-bold text-foreground">{todayOrders}</p>
-            </CardContent>
-          </Card>
-        </div>
+      <main className="flex-1 px-5 mt-6 space-y-6 max-w-md mx-auto w-full">
 
-        {/* Offline */}
-        {!isOnline && (
-          <div className="flex-1 flex flex-col items-center justify-center text-center mt-10">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-              <User className="w-8 h-8 text-muted-foreground" />
+        {/* EARNINGS HERO CARD - Premium Redesign */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="relative bg-card rounded-[32px] shadow-xl shadow-primary/5 border border-primary/10 overflow-hidden flex flex-col"
+        >
+          {/* Top Section */}
+          <div className="p-7 relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-4 h-4 text-accent" />
+              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">Today's Earnings</span>
             </div>
-            <h2 className="text-lg font-semibold text-foreground">{t("youAreOffline")}</h2>
-            <p className="text-sm text-muted-foreground">{t("goOnlineMsg")}</p>
-          </div>
-        )}
-
-        {/* Online — Incoming orders */}
-        {isOnline && incomingOrders.length > 0 && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <span className="text-base">🔔</span>
-              <h2 className="text-sm font-bold text-foreground">New Order Requests</h2>
-              <span className="ml-auto text-xs bg-yellow-400 text-black font-bold px-2 py-0.5 rounded-full">
-                {incomingOrders.length}
-              </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-foreground">₹</span>
+              <p className="text-[44px] font-black text-foreground leading-none tracking-tighter">{todayEarnings}</p>
             </div>
-
-            {incomingOrders.map((order) => (
-              <OrderCard
-                key={order.storeOrderPath}
-                order={order}
-                actionLoading={actionLoading}
-                onAction={handleDeliveryAction}
-              />
-            ))}
           </div>
-        )}
 
-        {/* Online — Looking for orders */}
-        {isOnline && incomingOrders.length === 0 && (
-          <div className="flex flex-col items-center justify-center text-center mt-10">
-            <div className="relative w-20 h-20 mb-6">
-              <span className="absolute w-full h-full rounded-full bg-yellow-400/30 animate-ping" />
-              <div className="relative w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center">
-                <Navigation className="w-8 h-8 text-black" />
+          {/* Bottom Metrics Bar */}
+          <div className="bg-muted/30 border-t border-border flex divide-x divide-border">
+            <div className="flex-1 px-6 py-4 flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-border flex items-center justify-center">
+                <Package className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-[16px] font-black text-foreground leading-none mb-1">{todayOrders}</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase">Orders</p>
               </div>
             </div>
-            <h2 className="text-lg font-semibold text-foreground">{t("lookingForOrders")}</h2>
-            <p className="text-sm text-muted-foreground">{t("highDemandMsg")}</p>
+            <div className="flex-1 px-6 py-4 flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-border flex items-center justify-center">
+                <Clock className="w-5 h-5 text-accent" />
+              </div>
+              <div>
+                <p className="text-[16px] font-black text-foreground leading-none mb-1">0h 42m</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase">Active</p>
+              </div>
+            </div>
           </div>
+        </motion.div>
+
+        {/* OFFLINE STATE */}
+        {!isOnline && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center text-center pt-16">
+            <div className="relative w-32 h-32 mb-8">
+              <div className="absolute inset-0 bg-muted/30 rounded-full animate-pulse" />
+              <div className="absolute inset-4 bg-muted/40 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <ShieldCheck className="w-12 h-12 text-muted-foreground/40" />
+              </div>
+            </div>
+            <h2 className="text-[22px] font-black text-foreground mb-2">You're currently offline</h2>
+            <p className="text-[15px] font-bold text-muted-foreground max-w-[240px] leading-relaxed">
+              Switch to online mode to start receiving delivery requests near you.
+            </p>
+            <button
+              onClick={() => setOnline(true)}
+              className="mt-10 btn-yellow px-10 py-4 shadow-xl shadow-primary/20"
+            >
+              Go Online Now
+            </button>
+          </motion.div>
         )}
+
+        {/* ONLINE — Looking for orders */}
+        {isOnline && incomingOrders.length === 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-10 flex flex-col items-center">
+            {/* Radar Animation - Enhanced */}
+            <div className="relative w-40 h-40 flex items-center justify-center mb-10">
+              <motion.div
+                animate={{ scale: [1, 2.5], opacity: [0.5, 0] }}
+                transition={{ repeat: Infinity, duration: 3, ease: "easeOut" }}
+                className="absolute inset-0 bg-primary/20 rounded-full"
+              />
+              <motion.div
+                animate={{ scale: [1, 2.2], opacity: [0.5, 0] }}
+                transition={{ repeat: Infinity, duration: 3, delay: 1, ease: "easeOut" }}
+                className="absolute inset-0 bg-primary/20 rounded-full"
+              />
+              <motion.div
+                animate={{ scale: [1, 1.9], opacity: [0.5, 0] }}
+                transition={{ repeat: Infinity, duration: 3, delay: 2, ease: "easeOut" }}
+                className="absolute inset-0 bg-primary/20 rounded-full"
+              />
+
+              <div className="relative z-10 w-20 h-20 bg-white rounded-3xl shadow-2xl flex items-center justify-center border-4 border-secondary rotate-45">
+                <Navigation className="w-10 h-10 text-primary fill-primary -rotate-45" />
+              </div>
+            </div>
+
+            <div className="text-center space-y-2">
+              <h2 className="text-[20px] font-black text-foreground">Seeking Requests</h2>
+              <p className="text-[14px] font-bold text-muted-foreground px-8 leading-relaxed">
+                Stay close to popular restaurant zones for faster order assignment.
+              </p>
+            </div>
+
+            {/* Smart Tip Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="w-full mt-10 p-5 bg-white border border-border rounded-[28px] shadow-sm flex items-start gap-4"
+            >
+              <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center shrink-0">
+                <Star className="w-6 h-6 text-accent fill-accent" />
+              </div>
+              <div>
+                <p className="text-[14px] font-black text-foreground mb-0.5">High Demand Area</p>
+                <p className="text-[12px] font-bold text-muted-foreground leading-snug italic">
+                  Earnings are boosted by 1.2x in your current location!
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* ACTIVE DELIVERIES */}
+        <AnimatePresence mode="popLayout">
+          {isOnline && incomingOrders.length > 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <h2 className="text-[18px] font-black text-foreground tracking-tight">Active Deliveries</h2>
+                <span className="text-[11px] bg-foreground text-white font-black px-3 py-1.5 rounded-full uppercase tracking-[0.1em]">
+                  {incomingOrders.length} TASKS
+                </span>
+              </div>
+              {incomingOrders.map((order) => (
+                <OrderCard key={order.storeOrderPath} order={order} actionLoading={actionLoading} onAction={handleDeliveryAction} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </main>
     </div>
   );

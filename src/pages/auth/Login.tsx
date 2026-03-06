@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Phone, ArrowLeft } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "../../components/ui/input-otp";
 import { toast } from "sonner";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
@@ -15,13 +12,23 @@ export default function Login() {
 
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [timer, setTimer] = useState(0);
+
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => setTimer((t) => t - 1), 1000);
+      return () => clearInterval(interval);
+    }
+  }, [timer]);
 
   useEffect(() => {
     setStep("phone");
-    setOtp("");
+    setOtp(["", "", "", "", "", ""]);
     setPartnerId(null);
   }, [isSignup]);
 
@@ -34,10 +41,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Normalize phone number: remove +91 if present, trim spaces
       const normalizedPhone = phone.replace(/^\+91/, "").trim();
-
-      // Querying basicInfo.phone with normalized 10-digit number
       const q = query(
         collection(db, "delivery"),
         where("basicInfo.phone", "==", normalizedPhone)
@@ -53,44 +57,53 @@ export default function Login() {
 
       const userDoc = querySnapshot.docs[0];
       const userData = userDoc.data();
-      // key is admin_status as per new design, fallback to status for backward compat if needed
       const status = (userData.admin_status || userData.status || "").toUpperCase();
 
       if (status === "APPROVED") {
         setPartnerId(userDoc.id);
         toast.success("OTP Sent", { description: "Use 123456 (mock)" });
         setStep("otp");
-      } else if (status === "PENDING" || status === "PENDING_VERIFICATION") {
-        toast.error("Your application is under review");
-      } else if (status === "SUSPENDED") {
-        toast.error("Your account is suspended. Contact support");
-      } else if (status === "REJECTED") {
-        toast.error("Your application was rejected");
+        setTimer(30);
+        setTimeout(() => otpRefs.current[0]?.focus(), 100);
       } else {
-        toast.error("Invalid account status: " + status);
+        toast.error("Your account is " + status.toLowerCase().replace(/_/g, " "));
       }
     } catch (error) {
       console.error("Error checking phone number:", error);
-      toast.error("Failed to verify phone number. Please try again.");
+      toast.error("Failed to verify phone number.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
   const verifyOTP = async () => {
-    if (otp !== "123456") {
-      toast.error("Invalid OTP", { description: "Try 123456" });
+    const otpValue = otp.join("");
+    if (otpValue !== "123456") {
+      toast.error("Invalid OTP. Try 123456");
       return;
     }
 
     setLoading(true);
-
-    // Simulate verification delay
     setTimeout(() => {
-      if (partnerId) {
-        localStorage.setItem("partnerId", partnerId);
-      }
-
+      if (partnerId) localStorage.setItem("partnerId", partnerId);
       toast.success("Login Successful");
       navigate("/dashboard");
       setLoading(false);
@@ -100,89 +113,109 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="p-4">
+      <div className="p-4 bg-card sticky top-0 z-10 flex items-center shadow-sm">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-muted active:scale-95 transition-transform"
         >
-          <ArrowLeft className="w-5 h-5" />
-          Back
+          <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
+        <h1 className="flex-1 text-center pr-10 text-[16px] font-bold text-foreground">
+          {isSignup ? "Partner Registration" : "Partner Login"}
+        </h1>
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col items-center px-4">
-        <h1 className="text-2xl font-bold text-foreground mb-2 mt-6">
-          {isSignup ? "Partner Registration" : "Partner Login"}
-        </h1>
+      <div className="flex-1 flex flex-col items-center px-5 pt-10">
+        <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-6">
+          <Phone className="w-8 h-8 text-primary" />
+        </div>
 
-        <p className="text-muted-foreground text-center mb-8">
+        <h2 className="text-[22px] font-bold text-foreground mb-2 text-center">
+          {step === "phone" ? "Enter your mobile number" : "Verify your number"}
+        </h2>
+
+        <p className="text-[14px] font-medium text-muted-foreground text-center mb-8">
           {step === "phone"
-            ? "Enter your mobile number to continue"
-            : `Verify OTP sent to +91 ${phone}`}
+            ? "We'll send you a verification code via SMS."
+            : `Code sent to +91 ${phone}`}
         </p>
 
         <div className="w-full max-w-md space-y-6">
           {step === "phone" ? (
             <>
-              <div className="flex gap-2">
-                <div className="w-14 flex items-center justify-center bg-card border border-border rounded-xl text-foreground">
+              {/* Phone Input */}
+              <div className="flex gap-3">
+                <div className="w-[72px] h-[56px] flex flex-col items-center justify-center bg-card border border-border rounded-2xl shadow-sm text-[15px] font-bold text-foreground">
+                  <span className="text-muted-foreground text-[10px] uppercase">Code</span>
                   +91
                 </div>
                 <div className="relative flex-1">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                  <Input
+                  <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="9876543210"
+                    placeholder="98765 43210"
                     maxLength={10}
-                    className="pl-9 py-6 rounded-xl"
                     disabled={loading}
+                    className="w-full h-[56px] pl-4 pr-4 bg-card border border-border rounded-2xl shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-[16px] font-medium text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               </div>
 
-              <Button
+              <button
                 onClick={sendOTP}
                 disabled={loading || phone.length !== 10}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-xl"
+                className="w-full btn-yellow py-[16px] text-[16px] disabled:opacity-50 disabled:active:scale-100"
               >
                 {loading ? "Sending OTP..." : "Get OTP"}
-              </Button>
+              </button>
             </>
           ) : (
             <>
-              <div className="flex justify-center">
-                <InputOTP value={otp} onChange={setOtp} maxLength={6}>
-                  <InputOTPGroup>
-                    {[...Array(6)].map((_, i) => (
-                      <InputOTPSlot
-                        key={i}
-                        index={i}
-                        className="w-12 h-12 border-2 rounded-xl border-border bg-card text-foreground"
-                      />
-                    ))}
-                  </InputOTPGroup>
-                </InputOTP>
+              {/* OTP Input Grid */}
+              <div className="flex justify-between gap-2">
+                {otp.map((digit, i) => (
+                  <input
+                    key={i}
+                    ref={(el) => { otpRefs.current[i] = el; }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(i, e.target.value)}
+                    onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                    className="w-[50px] h-[60px] text-center text-[24px] font-bold bg-card border-2 border-border rounded-2xl focus:border-primary focus:bg-secondary focus:ring-4 focus:ring-primary/20 outline-none transition-all text-foreground"
+                  />
+                ))}
               </div>
 
-              <Button
-                onClick={verifyOTP}
-                disabled={otp.length !== 6 || loading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 rounded-xl"
-              >
-                {loading ? "Verifying..." : "Verify & Continue"}
-              </Button>
+              <div className="pt-2 space-y-3">
+                <button
+                  onClick={verifyOTP}
+                  disabled={otp.join("").length !== 6 || loading}
+                  className="w-full btn-yellow py-[16px] text-[16px] disabled:opacity-50 disabled:active:scale-100"
+                >
+                  {loading ? "Verifying..." : "Verify & Continue"}
+                </button>
 
-              <Button
-                variant="ghost"
-                onClick={() => setStep("phone")}
-                className="w-full text-foreground hover:bg-accent"
-                disabled={loading}
-              >
-                Change Number
-              </Button>
+                <div className="flex justify-between items-center px-2">
+                  <button
+                    onClick={() => setStep("phone")}
+                    disabled={loading}
+                    className="text-[14px] font-bold text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Change Number
+                  </button>
+                  <button
+                    onClick={sendOTP}
+                    disabled={timer > 0 || loading}
+                    className="text-[14px] font-bold text-[#FFB300] disabled:text-muted-foreground transition-colors"
+                  >
+                    {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
+                  </button>
+                </div>
+              </div>
             </>
           )}
         </div>

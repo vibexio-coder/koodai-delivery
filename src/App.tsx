@@ -3,6 +3,7 @@ import { App as CapacitorApp } from "@capacitor/app";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import AppRoutes from "./routes/AppRoutes";
+import { useAppStore } from "./store/useAppStore";
 
 function AppSetup() {
   const navigate = useNavigate();
@@ -51,6 +52,26 @@ function AppSetup() {
 }
 
 export default function App() {
+  const { darkMode, autoOnline, setOnline } = useAppStore();
+
+  // Handle Dark Mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
+
+  // Handle Auto Online
+  useEffect(() => {
+    // Only auto-online if the user has a valid session
+    const partnerId = localStorage.getItem("partnerId");
+    if (autoOnline && partnerId) {
+      setOnline(true);
+    }
+  }, [autoOnline, setOnline]);
+
   return (
     // App shell (mobile container)
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">

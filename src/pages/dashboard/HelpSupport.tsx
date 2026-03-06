@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, AlertTriangle, Phone, HelpCircle, ArrowLeft, ChevronRight } from "lucide-react";
+import { t } from "../../i18n/translations";
 
 export default function HelpSupport() {
     const navigate = useNavigate();
@@ -7,26 +8,26 @@ export default function HelpSupport() {
     const supportOptions = [
         {
             icon: MessageSquare,
-            label: "In-App Chat Support",
-            description: "Chat with our support team directly",
+            label: t("inAppChat") || "In-App Chat Support",
+            description: t("chatWithSupport") || "Chat with our support team directly",
             action: () => alert("Chat support clicked"),
         },
         {
             icon: AlertTriangle,
-            label: "Report Order Issue",
-            description: "Report a problem with a live order",
+            label: t("reportOrderIssue") || "Report Order Issue",
+            description: t("reportProblemLive") || "Report a problem with a live order",
             action: () => alert("Report issue clicked"),
         },
         {
             icon: Phone,
-            label: "Call Support",
+            label: t("callSupport") || "Call Support",
             description: "+91 98765 43210 (Toll Free)",
             action: () => (window.location.href = "tel:+919876543210"),
         },
         {
             icon: HelpCircle,
-            label: "FAQ's",
-            description: "Frequently asked questions",
+            label: t("faqsLabel") || "FAQ's",
+            description: t("faqsDesc") || "Frequently asked questions",
             action: () => alert("FAQs clicked"),
         },
     ];
@@ -39,15 +40,15 @@ export default function HelpSupport() {
                     <ArrowLeft className="w-5 h-5 text-foreground" />
                 </button>
                 <div>
-                    <h1 className="text-[16px] font-bold text-foreground">Help & Support</h1>
-                    <p className="text-[12px] font-medium text-muted-foreground">How can we help you today?</p>
+                    <h1 className="text-[16px] font-bold text-foreground">{t("helpSupport") || "Help & Support"}</h1>
+                    <p className="text-[12px] font-medium text-muted-foreground">{t("howCanWeHelp") || "How can we help you today?"}</p>
                 </div>
             </div>
 
             <div className="p-4 space-y-4 max-w-md mx-auto w-full">
                 <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
                     <div className="bg-muted px-4 py-3 border-b border-border">
-                        <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">Contact Options</h2>
+                        <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">{t("contactOptions") || "Contact Options"}</h2>
                     </div>
                     <div className="divide-y divide-border">
                         {supportOptions.map((item, index) => (

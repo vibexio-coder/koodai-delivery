@@ -74,9 +74,9 @@ export default function Orders() {
 
   const getStatusLabel = (status: string) => {
     switch (status?.toLowerCase()) {
-      case "delivered": case "completed": return "Delivered";
-      case "cancelled": return "Cancelled";
-      case "out_for_delivery": case "out for delivery": return "In Transit";
+      case "delivered": case "completed": return t("stepDelivered") || "Delivered";
+      case "cancelled": return t("cancelled") || "Cancelled";
+      case "out_for_delivery": case "out for delivery": return t("inTransit") || "In Transit";
       default: return status ?? "—";
     }
   };
@@ -85,7 +85,7 @@ export default function Orders() {
     <div className="flex flex-col min-h-screen bg-background pb-24 relative">
       {/* Header */}
       <div className="bg-secondary p-5 pt-10 sticky top-0 z-10 border-b border-primary/20 shadow-sm">
-        <h1 className="text-[18px] font-extrabold text-foreground">Order History</h1>
+        <h1 className="text-[18px] font-extrabold text-foreground">{t("orderHistory") || "Order History"}</h1>
       </div>
 
       <div className="p-4 space-y-4 max-w-md mx-auto w-full">
@@ -100,9 +100,9 @@ export default function Orders() {
             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">
               <span className="text-4xl filter drop-shadow-sm">📦</span>
             </div>
-            <h2 className="text-[18px] font-extrabold text-foreground mb-2">No orders yet</h2>
+            <h2 className="text-[18px] font-extrabold text-foreground mb-2">{t("noOrdersYet") || "No orders yet"}</h2>
             <p className="text-[14px] font-medium text-muted-foreground mb-4 max-w-xs">
-              Start accepting deliveries to see your completed orders here.
+              {t("startAcceptingDeliveries") || "Start accepting deliveries to see your completed orders here."}
             </p>
           </div>
         )}

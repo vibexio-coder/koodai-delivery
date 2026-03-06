@@ -7,10 +7,21 @@ const translations: Record<Language, Record<string, string>> = {
         // Shared
         appSettings: "App Settings",
         profile: "Profile",
-        helpSupport: "Help & Support",
         logout: "Logout",
         appVersion: "App Version",
         loading: "Loading...",
+
+        // Help & Support
+        helpSupport: "Help & Support",
+        howCanWeHelp: "How can we help you today?",
+        contactOptions: "Contact Options",
+        inAppChat: "In-App Chat Support",
+        chatWithSupport: "Chat with our support team directly",
+        reportOrderIssue: "Report Order Issue",
+        reportProblemLive: "Report a problem with a live order",
+        callSupport: "Call Support",
+        faqsLabel: "FAQ's",
+        faqsDesc: "Frequently asked questions",
 
         // Bottom Nav
         navHome: "Home",
@@ -55,6 +66,19 @@ const translations: Record<Language, Record<string, string>> = {
         years: "Years",
         logoutSuccess: "Logged out successfully",
 
+        // Profile Extra
+        accountTitle: "Account",
+        profileDetails: "Profile Details",
+        vehicleDetails: "Vehicle Details",
+        documents: "Documents",
+        paymentDetails: "Payment Details",
+        settingsSupportTitle: "Settings & Support",
+        notifications: "Notifications",
+        faq: "FAQ",
+        ratingStat: "Rating",
+        deliveriesStat: "Deliveries",
+        experienceStat: "Experience",
+
         // Settings
         customizeExperience: "Customize your app experience",
         darkMode: "Dark Mode",
@@ -67,15 +91,73 @@ const translations: Record<Language, Record<string, string>> = {
         selectLanguage: "Select your preferred language",
         clearAppData: "Clear App Data",
         dataCleared: "App data cleared",
+
+        // Settings Additional
+        settingsTitle: "Settings",
+        appPreferences: "App Preferences",
+        localization: "Localization",
+        selectAppLanguage: "Select app language",
+
+        // Orders
+        orderHistory: "Order History",
+        noOrdersYet: "No orders yet",
+        startAcceptingDeliveries: "Start accepting deliveries to see your completed orders here.",
+        storeEntity: "Store",
+        customerEntity: "Customer",
+
+        // Earnings
+        today: "Today",
+        week: "Week",
+        month: "Month",
+        weeklyPerformance: "Weekly Performance",
+        seeAll: "See All",
+
+        // Home
+        received: "Received",
+        stepAccepted: "Accepted",
+        inTransit: "In Transit",
+        stepDelivered: "Delivered",
+        orderIdLabel: "Order ID",
+        pickupFrom: "Pickup From",
+        deliverTo: "Deliver To",
+        decline: "Decline",
+        acceptOrder: "Accept Order",
+        slidePickedUp: "Slide — Picked Up",
+        waitingForStore: "Waiting for Store",
+        packingInProgress: "Packing in progress...",
+        slideDelivered: "Slide — Delivered",
+        hello: "Hello,",
+        todaysEarnings: "Today's Earnings",
+        ordersCount: "Orders",
+        activeTime: "Active",
+        switchOnlineMsg: "Switch to online mode to start receiving delivery requests near you.",
+        goOnlineNow: "Go Online Now",
+        seekingRequests: "Seeking Requests",
+        stayCloseTip: "Stay close to popular restaurant zones for faster order assignment.",
+        highDemandArea: "High Demand Area",
+        earningsBoosted: "Earnings are boosted by 1.2x in your current location!",
+        activeDeliveries: "Active Deliveries",
+        tasks: "TASKS",
     },
     ta: {
         // Shared
         appSettings: "பயலியின் அமைப்புகள்",
         profile: "சுயவிவரம்",
-        helpSupport: "உதவி & ஆதரவு",
         logout: "வெளியேறு",
         appVersion: "செயலி பதிப்பு",
         loading: "ஏற்றுகிறது...",
+
+        // Help & Support
+        helpSupport: "உதவி மற்றும் ஆதரவு",
+        howCanWeHelp: "நாங்கள் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+        contactOptions: "தொடர்பு விருப்பங்கள்",
+        inAppChat: "உள்-பயன்பாட்டு அரட்டை ஆதரவு",
+        chatWithSupport: "எங்கள் ஆதரவுக் குழுவுடன் நேரடியாக அரட்டை அடிக்கவும்",
+        reportOrderIssue: "ஆர்டர் சிக்கலைப் புகாரளி",
+        reportProblemLive: "நேரடி ஆர்டரில் உள்ள சிக்கலைப் புகாரளி",
+        callSupport: "ஆதரவை அழைக்கவும்",
+        faqsLabel: "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+        faqsDesc: "அடிக்கடி கேட்கப்படும் கேள்விகள்",
 
         // Bottom Nav
         navHome: "முகப்பு",
@@ -120,6 +202,19 @@ const translations: Record<Language, Record<string, string>> = {
         years: "ஆண்டுகள்",
         logoutSuccess: "வெற்றிகரமாக வெளியேற்றப்பட்டது",
 
+        // Profile Extra
+        accountTitle: "கணக்கு",
+        profileDetails: "சுயவிவர விவரங்கள்",
+        vehicleDetails: "வாகன விவரங்கள்",
+        documents: "ஆவணங்கள்",
+        paymentDetails: "கட்டண விவரங்கள்",
+        settingsSupportTitle: "அமைப்புகள் மற்றும் ஆதரவு",
+        notifications: "அறிவிப்புகள்",
+        faq: "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+        ratingStat: "மதிப்பீடு",
+        deliveriesStat: "டெலிவரிகள்",
+        experienceStat: "அனுபவம்",
+
         // Settings
         customizeExperience: "உங்கள் அனுபவத்தை மாற்றியமைக்கவும்",
         darkMode: "டார்க் மோட்",
@@ -132,15 +227,73 @@ const translations: Record<Language, Record<string, string>> = {
         selectLanguage: "உங்கள் விருப்ப மொழியைத் தேர்ந்தெடுக்கவும்",
         clearAppData: "தரவை அழி",
         dataCleared: "தரவு அழிக்கப்பட்டது",
+
+        // Settings Additional
+        settingsTitle: "அமைப்புகள்",
+        appPreferences: "பயன்பாட்டு முன்னுரிமைகள்",
+        localization: "உள்ளூர்மயமாக்கல்",
+        selectAppLanguage: "பயன்பாட்டு மொழியைத் தேர்ந்தெடுக்கவும்",
+
+        // Orders
+        orderHistory: "ஆர்டர் வரலாறு",
+        noOrdersYet: "இன்னும் ஆர்டர்கள் இல்லை",
+        startAcceptingDeliveries: "உங்கள் முடிக்கப்பட்ட ஆர்டர்களை இங்கே காண டெலிவரிகளை ஏற்கத் தொடங்குங்கள்.",
+        storeEntity: "கடை",
+        customerEntity: "வாடிக்கையாளர்",
+
+        // Earnings
+        today: "இன்று",
+        week: "வாரம்",
+        month: "மாதம்",
+        weeklyPerformance: "வாராந்திர செயல்பாடு",
+        seeAll: "அனைத்தையும் காண்க",
+
+        // Home
+        received: "பெறப்பட்டது",
+        stepAccepted: "ஏற்றுக்கொள்ளப்பட்டது",
+        inTransit: "பயணத்தில்",
+        stepDelivered: "வழங்கப்பட்டது",
+        orderIdLabel: "ஆர்டர் ஐடி",
+        pickupFrom: "பிக்அப் இடம்",
+        deliverTo: "வழங்கும் இடம்",
+        decline: "நிராகரி",
+        acceptOrder: "ஆர்டரை ஏற்றுக்கொள்",
+        slidePickedUp: "ஸ்லைடு — பெறப்பட்டது",
+        waitingForStore: "கடைக்காக காத்திருக்கிறது",
+        packingInProgress: "பேக்கிங் நடக்கிறது...",
+        slideDelivered: "ஸ்லைடு — வழங்கப்பட்டது",
+        hello: "வணக்கம்,",
+        todaysEarnings: "இன்றைய வருவாய்",
+        ordersCount: "ஆர்டர்கள்",
+        activeTime: "செயலில்",
+        switchOnlineMsg: "உங்கள் அருகில் உள்ள டெலிவரி கோரிக்கைகளைப் பெற ஆன்லைன் முறைக்கு மாறவும்.",
+        goOnlineNow: "இப்போது ஆன்லைனுக்குச் செல்",
+        seekingRequests: "கோரிக்கைகளைத் தேடுகிறது",
+        stayCloseTip: "விரைவான ஆர்டர் ஒதுக்கீட்டிற்கு பிரபலமான உணவகப் பகுதிகளுக்கு அருகில் இருங்கள்.",
+        highDemandArea: "அதிக தேவை உள்ள பகுதி",
+        earningsBoosted: "உங்கள் தற்போதைய இடத்தில் வருவாய் 1.2 மடங்கு அதிகரிக்கப்பட்டுள்ளது!",
+        activeDeliveries: "செயலில் உள்ள டெலிவரிகள்",
+        tasks: "பணிகள்",
     },
     hi: {
         // Shared
         appSettings: "ऐप सेटिंग्स",
         profile: "प्रोफ़ाइल",
-        helpSupport: "सहायता और समर्थन",
         logout: "लॉग आउट",
         appVersion: "ऐप संस्करण",
         loading: "लोड हो रहा है...",
+
+        // Help & Support
+        helpSupport: "सहायता और समर्थन",
+        howCanWeHelp: "आज हम आपकी कैसे मदद कर सकते हैं?",
+        contactOptions: "संपर्क विकल्प",
+        inAppChat: "इन-ऐप चैट सपोर्ट",
+        chatWithSupport: "हमारी सपोर्ट टीम से सीधे चैट करें",
+        reportOrderIssue: "ऑर्डर समस्या की रिपोर्ट करें",
+        reportProblemLive: "लाइव ऑर्डर के साथ समस्या की रिपोर्ट करें",
+        callSupport: "सपोर्ट को कॉल करें",
+        faqsLabel: "सामान्य प्रश्न",
+        faqsDesc: "अक्सर पूछे जाने वाले प्रश्न",
 
         // Bottom Nav
         navHome: "होम",
@@ -185,6 +338,19 @@ const translations: Record<Language, Record<string, string>> = {
         years: "साल",
         logoutSuccess: "सफलतापूर्वक लॉग आउट किया गया",
 
+        // Profile Extra
+        accountTitle: "खाता",
+        profileDetails: "प्रोफ़ाइल विवरण",
+        vehicleDetails: "वाहन विवरण",
+        documents: "दस्तावेज़",
+        paymentDetails: "भुगतान विवरण",
+        settingsSupportTitle: "सेटिंग्स और सहायता",
+        notifications: "सूचनाएं",
+        faq: "अक्सर पूछे जाने वाले प्रश्न",
+        ratingStat: "रेटिंग",
+        deliveriesStat: "वितरण",
+        experienceStat: "अनुभव",
+
         // Settings
         customizeExperience: "अपना अनुभव अनुकूलित करें",
         darkMode: "डार्क मोड",
@@ -197,6 +363,53 @@ const translations: Record<Language, Record<string, string>> = {
         selectLanguage: "अपनी पसंद की भाषा चुनें",
         clearAppData: "ऐप डेटा साफ़ करें",
         dataCleared: "ऐप डेटा साफ़ किया गया",
+
+        // Settings Additional
+        settingsTitle: "सेटिंग्स",
+        appPreferences: "ऐप प्राथमिकताएं",
+        localization: "स्थानीयकरण",
+        selectAppLanguage: "ऐप की भाषा चुनें",
+
+        // Orders
+        orderHistory: "ऑर्डर का इतिहास",
+        noOrdersYet: "अभी तक कोई ऑर्डर नहीं",
+        startAcceptingDeliveries: "अपने पूरे किए गए ऑर्डर यहां देखने के लिए डिलीवरी स्वीकार करना शुरू करें।",
+        storeEntity: "स्टोर",
+        customerEntity: "ग्राहक",
+
+        // Earnings
+        today: "आज",
+        week: "सप्ताह",
+        month: "महीना",
+        weeklyPerformance: "साप्ताहिक प्रदर्शन",
+        seeAll: "सभी देखें",
+
+        // Home
+        received: "प्राप्त किया",
+        stepAccepted: "स्वीकार किया गया",
+        inTransit: "रास्ते में",
+        stepDelivered: "वितरित",
+        orderIdLabel: "ऑर्डर आईडी",
+        pickupFrom: "यहां से पिकअप",
+        deliverTo: "यहां वितरित करें",
+        decline: "अस्वीकार करें",
+        acceptOrder: "ऑर्डर स्वीकार करें",
+        slidePickedUp: "स्लाइड — पिकअप किया गया",
+        waitingForStore: "स्टोर की प्रतीक्षा में",
+        packingInProgress: "पैकिंग चल रही है...",
+        slideDelivered: "स्लाइड — वितरित",
+        hello: "नमस्ते,",
+        todaysEarnings: "आज की कमाई",
+        ordersCount: "ऑर्डर",
+        activeTime: "सक्रिय",
+        switchOnlineMsg: "अपने आस-पास डिलीवरी अनुरोध प्राप्त करना शुरू करने के लिए ऑनलाइन मोड पर स्विच करें।",
+        goOnlineNow: "अभी ऑनलाइन जाएं",
+        seekingRequests: "अनुरोध प्राप्त कर रहा है",
+        stayCloseTip: "तेज ऑर्डर असाइनमेंट के लिए लोकप्रिय रेस्तरां क्षेत्रों के करीब रहें।",
+        highDemandArea: "उच्च मांग वाला क्षेत्र",
+        earningsBoosted: "आपके वर्तमान स्थान में कमाई में 1.2x की वृद्धि हुई है!",
+        activeDeliveries: "सक्रिय डिलीवरी",
+        tasks: "कार्य",
     }
 };
 

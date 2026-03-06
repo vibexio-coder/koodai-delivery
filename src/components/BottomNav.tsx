@@ -37,7 +37,10 @@ export function BottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pt-2 pb-3 shadow-[0_-6px_24px_rgba(0,0,0,0.06)] z-50">
+    <div
+      className="fixed bottom-0 left-0 right-0 bg-card border-t border-border pt-2 shadow-[0_-6px_24px_rgba(0,0,0,0.06)] z-50"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+    >
       <div className="flex items-end justify-around max-w-md mx-auto px-1">
         {navItems.map((item) => {
           const active = isActive(item.path);

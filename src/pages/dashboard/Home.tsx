@@ -9,15 +9,16 @@ import { db } from "../../firebase/firebase";
 import { Order } from "../../types";
 import { useAppStore } from "../../store/useAppStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { t } from "../../i18n/translations";
 
 /* ─────────────────────────────────────────────
    Step Progress Indicator - Premium Refined
 ───────────────────────────────────────────── */
 const STEPS = [
-  { key: "pending_acceptance", label: "Received" },
-  { key: "accepted", label: "Accepted" },
-  { key: "picked_up", label: "In Transit" },
-  { key: "delivered", label: "Delivered" },
+  { key: "pending_acceptance", labelKey: "received", defaultLabel: "Received" },
+  { key: "accepted", labelKey: "stepAccepted", defaultLabel: "Accepted" },
+  { key: "picked_up", labelKey: "inTransit", defaultLabel: "In Transit" },
+  { key: "delivered", labelKey: "stepDelivered", defaultLabel: "Delivered" },
 ];
 
 function getStepIndex(status: string) {
@@ -69,7 +70,7 @@ function StepProgress({ status }: { status: string }) {
                 `}
                 style={{ maxWidth: 50 }}
               >
-                {step.label}
+                {t(step.labelKey) || step.defaultLabel}
               </span>
             </div>
           );
@@ -233,7 +234,7 @@ function OrderCard({
       <div className="px-5 pb-5">
         <div className="flex justify-between items-start">
           <div className="space-y-0.5">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Order ID</span>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">{t("orderIdLabel") || "Order ID"}</span>
             <p className="text-[15px] font-black text-foreground">#{order.orderId.slice(0, 8).toUpperCase()}</p>
           </div>
           <div className="text-right">
@@ -242,7 +243,7 @@ function OrderCard({
                ${isNew ? "bg-secondary text-accent" : "bg-[#E8F5E9] text-[#2E7D32]"}
              `}>
               <span className={`w-1.5 h-1.5 rounded-full ${isNew ? 'bg-accent animate-pulse' : 'bg-[#2E7D32]'}`} />
-              {isNew ? "New Request" : order.deliveryStatus.replace('_', ' ')}
+              {isNew ? (t("newRequest") || "New Request") : order.deliveryStatus.replace('_', ' ')}
             </div>
           </div>
         </div>
@@ -257,7 +258,7 @@ function OrderCard({
             <div className="absolute -left-7 w-[22px] h-[22px] bg-secondary rounded-full border-2 border-white shadow-sm flex items-center justify-center">
               <Store className="w-3 h-3 text-accent" />
             </div>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Pickup From</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{t("pickupFrom") || "Pickup From"}</p>
             <p className="text-[14px] font-extrabold text-foreground">{order.storeName}</p>
           </div>
 
@@ -265,7 +266,7 @@ function OrderCard({
             <div className="absolute -left-7 w-[22px] h-[22px] bg-[#E8F5E9] rounded-full border-2 border-white shadow-sm flex items-center justify-center">
               <MapPin className="w-3 h-3 text-[#4CAF50]" />
             </div>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Deliver To</p>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{t("deliverTo") || "Deliver To"}</p>
             <p className="text-[14px] font-extrabold text-foreground truncate">{dropLabel}</p>
           </div>
         </div>
@@ -283,16 +284,16 @@ function OrderCard({
             <button
               onClick={() => onAction(order.storeOrderPath, "declined")}
               disabled={actionLoading === order.storeOrderPath + "declined"}
-              className="flex-1 bg-white hover:bg-muted text-foreground font-black py-4 rounded-2xl transition-all border-2 border-border shadow-sm disabled:opacity-50"
+              className="flex-1 bg-white dark:bg-card hover:bg-muted text-foreground font-black py-4 rounded-2xl transition-all border-2 border-border shadow-sm disabled:opacity-50"
             >
-              Decline
+              {t("decline") || "Decline"}
             </button>
             <button
               onClick={() => onAction(order.storeOrderPath, "accepted")}
               disabled={actionLoading === order.storeOrderPath + "accepted"}
               className="flex-1 btn-yellow py-4 shadow-lg shadow-primary/20 active:translate-y-0.5"
             >
-              Accept Order
+              {t("acceptOrder") || "Accept Order"}
             </button>
           </div>
         )}
@@ -300,7 +301,7 @@ function OrderCard({
         {isAccepted && (
           order.storeStatus === "Out for Delivery" || order.storeStatus === "Ready" ? (
             <SlideAction
-              label="Slide — Picked Up"
+              label={t("slidePickedUp") || "Slide — Picked Up"}
               color="yellow"
               loading={actionLoading === order.storeOrderPath + "picked_up"}
               onConfirm={() => onAction(order.storeOrderPath, "picked_up")}
@@ -317,8 +318,8 @@ function OrderCard({
                   />
                 </div>
                 <div>
-                  <p className="text-[14px] font-black text-foreground">Waiting for Store</p>
-                  <p className="text-[11px] font-bold text-accent italic">Packing in progress...</p>
+                  <p className="text-[14px] font-black text-foreground">{t("waitingForStore") || "Waiting for Store"}</p>
+                  <p className="text-[11px] font-bold text-accent italic">{t("packingInProgress") || "Packing in progress..."}</p>
                 </div>
               </div>
               <div className="flex gap-1.5 items-end h-6">
@@ -337,7 +338,7 @@ function OrderCard({
 
         {isPickedUp && (
           <SlideAction
-            label="Slide — Delivered"
+            label={t("slideDelivered") || "Slide — Delivered"}
             color="success"
             loading={actionLoading === order.storeOrderPath + "delivered"}
             onConfirm={() => onAction(order.storeOrderPath, "delivered")}
@@ -473,15 +474,15 @@ export default function Home() {
               {isOnline && <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#4CAF50] rounded-full border-4 border-secondary" />}
             </div>
             <div>
-              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Hello,</p>
+              <p className="text-[11px] font-black text-muted-foreground uppercase tracking-widest opacity-60">{t("hello") || "Hello,"}</p>
               <h1 className="text-[18px] font-black text-foreground leading-tight">{name}</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/50 border border-border px-4 py-2 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-3 bg-card/60 dark:bg-card/80 border border-border px-4 py-2 rounded-2xl shadow-sm backdrop-blur-sm">
             <div className="flex flex-col items-end">
-              <span className={`text-[12px] font-black tracking-tighter ${isOnline ? "text-[#2E7D32]" : "text-muted-foreground"}`}>
-                {isOnline ? "ONLINE" : "OFFLINE"}
+              <span className={`text-[12px] font-black tracking-tighter ${isOnline ? "text-[#2E7D32]" : "text-muted-foreground dark:text-gray-300"}`}>
+                {isOnline ? (t("online") || "ONLINE") : (t("offline") || "OFFLINE")}
               </span>
             </div>
             <Switch checked={isOnline} onCheckedChange={setOnline} className="scale-90 data-[state=checked]:bg-[#4CAF50]" />
@@ -502,7 +503,7 @@ export default function Home() {
             <div className="absolute -right-8 -top-8 w-40 h-40 bg-primary/10 rounded-full blur-3xl" />
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-accent" />
-              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">Today's Earnings</span>
+              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-widest">{t("todaysEarnings") || "Today's Earnings"}</span>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-black text-foreground">₹</span>
@@ -518,7 +519,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-[16px] font-black text-foreground leading-none mb-1">{todayOrders}</p>
-                <p className="text-[10px] font-black text-muted-foreground uppercase">Orders</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase">{t("ordersCount") || "Orders"}</p>
               </div>
             </div>
             <div className="flex-1 px-6 py-4 flex items-center gap-3">
@@ -527,7 +528,7 @@ export default function Home() {
               </div>
               <div>
                 <p className="text-[16px] font-black text-foreground leading-none mb-1">0h 42m</p>
-                <p className="text-[10px] font-black text-muted-foreground uppercase">Active</p>
+                <p className="text-[10px] font-black text-muted-foreground uppercase">{t("activeTime") || "Active"}</p>
               </div>
             </div>
           </div>
@@ -542,15 +543,15 @@ export default function Home() {
                 <ShieldCheck className="w-12 h-12 text-muted-foreground/40" />
               </div>
             </div>
-            <h2 className="text-[22px] font-black text-foreground mb-2">You're currently offline</h2>
+            <h2 className="text-[22px] font-black text-foreground mb-2">{t("youAreOffline") || "You're currently offline"}</h2>
             <p className="text-[15px] font-bold text-muted-foreground max-w-[240px] leading-relaxed">
-              Switch to online mode to start receiving delivery requests near you.
+              {t("switchOnlineMsg") || "Switch to online mode to start receiving delivery requests near you."}
             </p>
             <button
               onClick={() => setOnline(true)}
               className="mt-10 btn-yellow px-10 py-4 shadow-xl shadow-primary/20"
             >
-              Go Online Now
+              {t("goOnlineNow") || "Go Online Now"}
             </button>
           </motion.div>
         )}
@@ -582,9 +583,9 @@ export default function Home() {
             </div>
 
             <div className="text-center space-y-2">
-              <h2 className="text-[20px] font-black text-foreground">Seeking Requests</h2>
+              <h2 className="text-[20px] font-black text-foreground">{t("seekingRequests") || "Seeking Requests"}</h2>
               <p className="text-[14px] font-bold text-muted-foreground px-8 leading-relaxed">
-                Stay close to popular restaurant zones for faster order assignment.
+                {t("stayCloseTip") || "Stay close to popular restaurant zones for faster order assignment."}
               </p>
             </div>
 
@@ -598,9 +599,9 @@ export default function Home() {
                 <Star className="w-6 h-6 text-accent fill-accent" />
               </div>
               <div>
-                <p className="text-[14px] font-black text-foreground mb-0.5">High Demand Area</p>
+                <p className="text-[14px] font-black text-foreground mb-0.5">{t("highDemandArea") || "High Demand Area"}</p>
                 <p className="text-[12px] font-bold text-muted-foreground leading-snug italic">
-                  Earnings are boosted by 1.2x in your current location!
+                  {t("earningsBoosted") || "Earnings are boosted by 1.2x in your current location!"}
                 </p>
               </div>
             </motion.div>
@@ -612,9 +613,9 @@ export default function Home() {
           {isOnline && incomingOrders.length > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
               <div className="flex items-center justify-between mb-2 px-1">
-                <h2 className="text-[18px] font-black text-foreground tracking-tight">Active Deliveries</h2>
+                <h2 className="text-[18px] font-black text-foreground tracking-tight">{t("activeDeliveries") || "Active Deliveries"}</h2>
                 <span className="text-[11px] bg-foreground text-white font-black px-3 py-1.5 rounded-full uppercase tracking-[0.1em]">
-                  {incomingOrders.length} TASKS
+                  {incomingOrders.length} {t("tasks") || "TASKS"}
                 </span>
               </div>
               {incomingOrders.map((order) => (

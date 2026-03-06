@@ -25,8 +25,8 @@ export default function AppSettings() {
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
         <div>
-          <h1 className="text-[16px] font-bold text-foreground">Settings</h1>
-          <p className="text-[12px] font-medium text-muted-foreground">Customize your experience</p>
+          <h1 className="text-[16px] font-bold text-foreground">{t("settingsTitle") || "Settings"}</h1>
+          <p className="text-[12px] font-medium text-muted-foreground">{t("customizeExperience") || "Customize your experience"}</p>
         </div>
       </div>
 
@@ -34,16 +34,16 @@ export default function AppSettings() {
         {/* Preferences */}
         <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           <div className="bg-muted px-4 py-3 border-b border-border">
-            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">App Preferences</h2>
+            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">{t("appPreferences") || "App Preferences"}</h2>
           </div>
           <div className="divide-y divide-border">
-            <SettingRow icon={Moon} label="Dark Mode" description="Switch between light and dark themes">
+            <SettingRow icon={Moon} label={t("darkMode") || "Dark Mode"} description={t("darkModeDesc") || "Switch between light and dark themes"}>
               <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
             </SettingRow>
-            <SettingRow icon={Bell} label="Sound Alerts" description="Play sounds for new orders">
+            <SettingRow icon={Bell} label={t("soundAlerts") || "Sound Alerts"} description={t("soundAlertsDesc") || "Play sounds for new orders"}>
               <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
             </SettingRow>
-            <SettingRow icon={Power} label="Auto Online" description="Go online when app opens">
+            <SettingRow icon={Power} label={t("autoOnline") || "Auto Online"} description={t("autoOnlineDesc") || "Go online when app opens"}>
               <Switch checked={autoOnline} onCheckedChange={setAutoOnline} />
             </SettingRow>
           </div>
@@ -52,7 +52,7 @@ export default function AppSettings() {
         {/* Language */}
         <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           <div className="bg-muted px-4 py-3 border-b border-border">
-            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">Localization</h2>
+            <h2 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">{t("localization") || "Localization"}</h2>
           </div>
           <div className="p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -60,8 +60,8 @@ export default function AppSettings() {
                 <Languages className="w-5 h-5 text-foreground" />
               </div>
               <div>
-                <p className="text-[15px] font-bold text-foreground">Language</p>
-                <p className="text-[12px] font-medium text-muted-foreground">Select app language</p>
+                <p className="text-[15px] font-bold text-foreground">{t("language") || "Language"}</p>
+                <p className="text-[12px] font-medium text-muted-foreground">{t("selectAppLanguage") || "Select app language"}</p>
               </div>
             </div>
             <select
@@ -82,7 +82,7 @@ export default function AppSettings() {
           className="w-full mt-4 bg-card border border-destructive/30 text-destructive hover:bg-destructive/5 active:scale-[0.98] transition-all font-bold p-4 rounded-2xl flex items-center justify-center gap-2 shadow-sm text-[15px]"
         >
           <Trash2 className="w-5 h-5" />
-          Clear App Data
+          {t("clearAppData") || "Clear App Data"}
         </button>
       </div>
     </div>

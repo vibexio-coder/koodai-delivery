@@ -73,9 +73,9 @@ export default function App() {
   }, [autoOnline, setOnline]);
 
   return (
-    // App shell (mobile container)
+    // App shell (responsive container)
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
-      <div className="max-w-md mx-auto relative bg-background min-h-screen shadow-xl border-x">
+      <div className="max-w-md mx-auto relative bg-background min-h-screen shadow-xl">
         <AppSetup />
       </div>
       <Toaster position="top-center" />

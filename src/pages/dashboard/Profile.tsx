@@ -47,22 +47,22 @@ export default function Profile() {
 
   const menuGroups = [
     {
-      title: "Account",
+      title: t("accountTitle") || "Account",
       items: [
-        { icon: User, label: t("profile") || "Profile Details", path: "/dashboard/profile/details" },
-        { icon: Car, label: "Vehicle Details", path: "/dashboard/vehicle" },
-        { icon: FileText, label: "Documents", path: "/dashboard/documents" },
-        { icon: CreditCard, label: "Payment Details", path: "/dashboard/payment" },
+        { icon: User, label: t("profileDetails") || "Profile Details", path: "/dashboard/profile/details" },
+        { icon: Car, label: t("vehicleDetails") || "Vehicle Details", path: "/onboarding/step-4" },
+        { icon: FileText, label: t("documents") || "Documents", path: "/onboarding/step-3" },
+        { icon: CreditCard, label: t("paymentDetails") || "Payment Details", path: "/onboarding/step-5" },
       ]
     },
     {
-      title: "Settings & Support",
+      title: t("settingsSupportTitle") || "Settings & Support",
       items: [
         { icon: Settings, label: t("appSettings") || "App Settings", path: "/dashboard/settings" },
-        { icon: Bell, label: "Notifications", path: "/dashboard/notifications" },
-        { icon: Globe, label: "Language", path: "/dashboard/language" },
+        { icon: Bell, label: t("notifications") || "Notifications", path: "/dashboard/notifications" },
+        { icon: Globe, label: t("language") || "Language", path: "/dashboard/language" },
         { icon: HelpCircle, label: t("helpSupport") || "Help & Support", path: "/dashboard/help-support" },
-        { icon: FileQuestion, label: "FAQ", path: "/dashboard/faq" },
+        { icon: FileQuestion, label: t("faq") || "FAQ", path: "/dashboard/faq" },
       ]
     }
   ];
@@ -91,11 +91,11 @@ export default function Profile() {
         </div>
 
         <div className="mt-8 flex justify-center gap-6">
-          <Stat label="RATING" value="4.8" star />
+          <Stat label={t("ratingStat") || "RATING"} value="4.8" star />
           <Divider />
-          <Stat label="DELIVERIES" value="1,240" />
+          <Stat label={t("deliveriesStat") || "DELIVERIES"} value="1,240" />
           <Divider />
-          <Stat label="EXPERIENCE" value="2.5 Yrs" />
+          <Stat label={t("experienceStat") || "EXPERIENCE"} value="2.5 Yrs" />
         </div>
       </div>
 
@@ -137,7 +137,7 @@ export default function Profile() {
         </button>
 
         <p className="text-center text-[12px] font-semibold text-muted-foreground mt-6">
-          Koodai Delivery Partner App • Version 2.0.0
+          Koodai Delivery Partner App • {t("appVersion") || "Version"} 2.0.0
         </p>
       </div>
     </div>
